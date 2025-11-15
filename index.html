@@ -393,18 +393,33 @@
 
     function update(dt, timestamp) {
       const level = LEVELS[currentLevelIndex];
+
       // Base speed for this level
       let levelSpeed = level.speed;
 
       // EXTRA: after 150 points in flak stage, gradually speed up every 50 points
       if (currentLevelIndex === 3 && score >= 150) {
-        const extraSteps = Math.floor((score - 150) / 50) + 1; // 150–199 → 1, 200–249 → 2, etc.
-        const extra = extraSteps * 0.25; // tweak value for how strong the speed-up is
+        const extraSteps = Math.floor((score - 150) / 50) + 1; // 150–199 → 1, 200–249 → 2, ...
+        const extra = extraSteps * 0.25;
         levelSpeed += extra;
       }
 
+      // Plane-based speed factor:
+      // DR.3 slightly slower (easier), DR.1 & Diego at normal speed
+      let planeSpeedFactor = 1.0;
+      if (planeType === "dr3") {
+        planeSpeedFactor = 0.9;   // slightly slower world
+      } else if (planeType === "dr1") {
+        planeSpeedFactor = 1.0;   // original
+      } else if (planeType === "diego") {
+        planeSpeedFactor = 1.0;   // same as DR.1 for now
+      }
+
+      levelSpeed *= planeSpeedFactor;
+
       const speedFactor = dt / (1000 / 60);
 
+      // physics
       plane.vy += level.gravity * speedFactor;
       plane.y += plane.vy * speedFactor;
 
