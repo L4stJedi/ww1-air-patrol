@@ -128,6 +128,7 @@
 
     const UI_FONT = "Segoe UI, Tahoma, Geneva, Verdana, sans-serif";
 
+    // Screens: splash, planeSelectGerman, planeSelectBritish, game
     let screen = "splash";
 
     let germanEntryRect = null;
@@ -155,6 +156,13 @@
     dr3Img.onload = () => { dr3Loaded = true; };
     dr3Img.onerror = () => console.error("Could not load FokkerDR3.png");
     dr3Img.src = "FokkerDR3.png";
+
+    // NEW: Thumbnail for DR3
+    const dr3ThumbImg = new Image();
+    let dr3ThumbLoaded = false;
+    dr3ThumbImg.onload = () => { dr3ThumbLoaded = true; };
+    dr3ThumbImg.onerror = () => console.error("Could not load FokkerDR3_Thumbnail.png");
+    dr3ThumbImg.src = "FokkerDR3_Thumbnail.png";
 
     const dr1Img = new Image();
     let dr1Loaded = false;
@@ -245,6 +253,7 @@
     let obstacles;
     let score = 0;
 
+    // High score & leaderboard
     let bestScore = parseInt(localStorage.getItem("ww1_fokker_best") || "0", 10);
     let bestPilotName = localStorage.getItem("ww1_fokker_best_pilot") || "-";
 
@@ -965,7 +974,7 @@
       }
     }
 
-    // ---------- SPLASH SCREEN (colors tweaked) ----------
+    // ---------- SPLASH SCREEN ----------
     function drawSplash() {
       if (screen !== "splash") return;
 
@@ -1075,7 +1084,7 @@
       hintEl.textContent = "Tap a side to enter";
     }
 
-    // ---------- GERMAN PLANE SELECT (colors tweaked) ----------
+    // ---------- GERMAN PLANE SELECT (uses DR3 thumbnail) ----------
     function drawGermanPlaneList() {
       if (screen !== "planeSelectGerman") return;
 
@@ -1102,38 +1111,10 @@
       const rowW = W - 80;
 
       const entries = [
-        {
-          tier: "Tier 1",
-          label: "Fokker DR.3",
-          planeType: "dr3",
-          unlocked: true,
-          img: dr3Img,
-          loaded: dr3Loaded
-        },
-        {
-          tier: "Tier 2",
-          label: "Fokker DR.1",
-          planeType: "dr1",
-          unlocked: dr1Unlocked,
-          img: dr1Img,
-          loaded: dr1Loaded
-        },
-        {
-          tier: "Tier 3",
-          label: "DiegoPilot",
-          planeType: "diego",
-          unlocked: true,
-          img: diegoImg,
-          loaded: diegoLoaded
-        },
-        {
-          tier: "Tier 4",
-          label: "Fokker D.VII",
-          planeType: "dvii",
-          unlocked: true,
-          img: dviiImg,
-          loaded: dviiLoaded
-        }
+        { tier: "Tier 1", label: "Fokker DR.3", planeType: "dr3", unlocked: true },
+        { tier: "Tier 2", label: "Fokker DR.1", planeType: "dr1", unlocked: dr1Unlocked },
+        { tier: "Tier 3", label: "DiegoPilot", planeType: "diego", unlocked: true },
+        { tier: "Tier 4", label: "Fokker D.VII", planeType: "dvii", unlocked: true }
       ];
 
       entries.forEach((entry, i) => {
@@ -1150,12 +1131,25 @@
         const thumbX = rowX + 20;
         const thumbY = y + (rowH - 14) / 2;
 
-        if (entry.loaded) {
+        // Decide which image to show
+        let imgToUse = null;
+        if (entry.planeType === "dr3") {
+          if (dr3ThumbLoaded)      imgToUse = dr3ThumbImg;
+          else if (dr3Loaded)      imgToUse = dr3Img;
+        } else if (entry.planeType === "dr1") {
+          if (dr1Loaded)           imgToUse = dr1Img;
+        } else if (entry.planeType === "diego") {
+          if (diegoLoaded)         imgToUse = diegoImg;
+        } else if (entry.planeType === "dvii") {
+          if (dviiLoaded)          imgToUse = dviiImg;
+        }
+
+        if (imgToUse) {
           const maxW = 90;
-          const scale = Math.min(maxW / entry.img.width, 0.5);
-          const imgW = entry.img.width * scale;
-          const imgH = entry.img.height * scale;
-          ctx.drawImage(entry.img, thumbX - imgW / 2, thumbY - imgH / 2, imgW, imgH);
+          const scale = Math.min(maxW / imgToUse.width, 0.5);
+          const imgW = imgToUse.width * scale;
+          const imgH = imgToUse.height * scale;
+          ctx.drawImage(imgToUse, thumbX - imgW / 2, thumbY - imgH / 2, imgW, imgH);
         } else {
           ctx.fillStyle = "#b0bec5";
           ctx.fillRect(thumbX - 30, thumbY - 15, 60, 30);
