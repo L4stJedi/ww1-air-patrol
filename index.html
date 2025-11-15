@@ -119,17 +119,17 @@
 
     const UI_FONT = "Segoe UI, Tahoma, Geneva, Verdana, sans-serif";
 
-    // --- Game state / screens ---
+    // --- Screens ---
     // "splash" → choose side (German / British)
     // "planeSelectGerman" → list of tiers
-    // "planeSelectBritish" → under construction screen
+    // "planeSelectBritish" → under construction
     // "game" → actual flying
     let screen = "splash";
 
     // clickable areas
     let germanEntryRect = null;
     let britishEntryRect = null;
-    let germanPlaneChoices = []; // rows for Tier 1/2/3
+    let germanPlaneChoices = [];
 
     function fillRoundedRect(x, y, w, h, r) {
       ctx.beginPath();
@@ -324,6 +324,7 @@
       }
     }
 
+    // Spawn obstacles, with flak mixing at high scores
     function spawnObstacle(timestamp) {
       const level = LEVELS[currentLevelIndex];
       if (!lastSpawnTime) lastSpawnTime = timestamp;
@@ -337,14 +338,36 @@
       const yMax = H - GROUND_HEIGHT - marginBottom;
       const baseY = Math.random() * (yMax - yMin) + yMin;
 
-      const radius = level.obstacle === "zeppelin" ? 40 : 26;
+      // Default obstacle type from level
+      let obstacleType = level.obstacle;
+
+      // In "Ace of Aces" (flak stage) mix in other types at higher scores
+      if (currentLevelIndex === 3) {
+        if (score >= 500) {
+          // flak + zeppelins
+          const r = Math.random();
+          obstacleType = (r < 0.6) ? "flak" : "zeppelin";
+        } else if (score >= 400) {
+          // flak + balloons
+          const r = Math.random();
+          obstacleType = (r < 0.6) ? "flak" : "balloon";
+        } else if (score >= 300) {
+          // flak + clouds
+          const r = Math.random();
+          obstacleType = (r < 0.7) ? "flak" : "cloud";
+        } else {
+          obstacleType = "flak";
+        }
+      }
+
+      const radius = obstacleType === "zeppelin" ? 40 : 26;
 
       obstacles.push({
         x: W + radius + 10,
         y: baseY,
         baseY,
         r: radius,
-        type: level.obstacle,
+        type: obstacleType,
         scored: false,
         phase: Math.random() * Math.PI * 2
       });
@@ -370,6 +393,16 @@
 
     function update(dt, timestamp) {
       const level = LEVELS[currentLevelIndex];
+      // Base speed for this level
+      let levelSpeed = level.speed;
+
+      // EXTRA: after 150 points in flak stage, gradually speed up every 50 points
+      if (currentLevelIndex === 3 && score >= 150) {
+        const extraSteps = Math.floor((score - 150) / 50) + 1; // 150–199 → 1, 200–249 → 2, etc.
+        const extra = extraSteps * 0.25; // tweak value for how strong the speed-up is
+        levelSpeed += extra;
+      }
+
       const speedFactor = dt / (1000 / 60);
 
       plane.vy += level.gravity * speedFactor;
@@ -378,7 +411,8 @@
       spawnObstacle(timestamp);
 
       for (const o of obstacles) {
-        o.x -= level.speed * speedFactor;
+        // use adjusted speed for obstacle movement
+        o.x -= levelSpeed * speedFactor;
 
         let amp = 0;
         let freq = 0;
@@ -396,7 +430,8 @@
 
       obstacles = obstacles.filter(o => o.x + o.r > -20);
 
-      const base = level.speed * speedFactor;
+      // parallax movement also uses adjusted levelSpeed
+      const base = levelSpeed * speedFactor;
       parallax.far -= base * 0.3;
       parallax.mid -= base * 0.6;
       parallax.fore -= base * 1.0;
@@ -826,7 +861,7 @@
       }
     }
 
-    // --- Splash screen: title, logo, German cross & British roundel ---
+    // --- Splash: choose side ---
     function drawSplash() {
       if (screen !== "splash") return;
 
@@ -836,12 +871,10 @@
 
       ctx.textAlign = "center";
 
-      // Game title
       ctx.fillStyle = "#1e3a5f";
       ctx.font = "26px " + UI_FONT;
       ctx.fillText("WW1 Air Patrol", W / 2, H * 0.15);
 
-      // "powered by" + logo
       ctx.fillStyle = "#555";
       ctx.font = "16px " + UI_FONT;
       ctx.fillText("powered by", W / 2, H * 0.20);
@@ -856,7 +889,6 @@
         ctx.drawImage(splashLogo, x, y, imgW, imgH);
       }
 
-      // Instruction
       ctx.fillStyle = "#333";
       ctx.font = "18px " + UI_FONT;
       ctx.fillText("Choose your side", W / 2, H * 0.45);
@@ -866,7 +898,7 @@
       const germanX = W * 0.28;
       const britishX = W * 0.72;
 
-      // German cross (Balkenkreuz-ish)
+      // German cross
       germanEntryRect = {
         x: germanX - iconSize / 2,
         y: iconY - iconSize / 2,
@@ -877,11 +909,9 @@
       ctx.translate(germanX, iconY);
       const s = iconSize / 2;
       ctx.fillStyle = "#000";
-      // black base cross
       ctx.fillRect(-s * 0.2, -s, s * 0.4, s * 2);
       ctx.fillRect(-s, -s * 0.2, s * 2, s * 0.4);
       ctx.fillStyle = "#fff";
-      // inner white cross
       ctx.fillRect(-s * 0.12, -s * 0.75, s * 0.24, s * 1.5);
       ctx.fillRect(-s * 0.75, -s * 0.12, s * 1.5, s * 0.24);
       ctx.restore();
@@ -896,31 +926,29 @@
       ctx.save();
       ctx.translate(britishX, iconY);
       const r = iconSize * 0.45;
-      // outer blue
       ctx.beginPath();
       ctx.fillStyle = "#165ba5";
       ctx.arc(0, 0, r, 0, Math.PI * 2);
       ctx.fill();
-      // middle white
       ctx.beginPath();
       ctx.fillStyle = "#ffffff";
       ctx.arc(0, 0, r * 0.7, 0, Math.PI * 2);
       ctx.fill();
-      // inner red
       ctx.beginPath();
       ctx.fillStyle = "#c7232c";
       ctx.arc(0, 0, r * 0.38, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
 
-      // Labels
       ctx.fillStyle = "#222";
       ctx.font = "15px " + UI_FONT;
       ctx.fillText("German Air Service", germanX, iconY + iconSize * 0.75);
       ctx.fillText("Royal Flying Corps", britishX, iconY + iconSize * 0.75);
+
+      hintEl.textContent = "Tap a side to enter";
     }
 
-    // --- German plane selection screen (T1/T2/T3) ---
+    // --- German plane selection screen ---
     function drawGermanPlaneList() {
       if (screen !== "planeSelectGerman") return;
 
@@ -1020,14 +1048,13 @@
         });
       });
 
-      // Small hint at bottom
       ctx.textAlign = "center";
       ctx.fillStyle = "#777";
       ctx.font = "13px " + UI_FONT;
       ctx.fillText("Tap anywhere outside rows to go back", W / 2, H - 30);
     }
 
-    // --- British side: under construction screen ---
+    // --- British: under construction ---
     function drawBritishWIP() {
       if (screen !== "planeSelectBritish") return;
 
@@ -1041,7 +1068,6 @@
       ctx.font = "22px " + UI_FONT;
       ctx.fillText("Royal Flying Corps", W / 2, H * 0.16);
 
-      // Big roundel
       const centerX = W / 2;
       const centerY = H * 0.40;
       const r = 90;
@@ -1135,10 +1161,9 @@
             drawBritishWIP();
             return;
           }
-          // click elsewhere: do nothing
           return;
         } else {
-          // keyboard: just start German Tier 1 as default
+          // keyboard: start German Tier 1 by default
           planeType = "dr3";
           screen = "game";
           hintEl.textContent = "Tap or press SPACE to fly ✈️";
@@ -1152,7 +1177,7 @@
       // --- GERMAN PLANE SELECT ---
       if (screen === "planeSelectGerman") {
         if (!evt) {
-          // keyboard: default Tier 1
+          // keyboard default: Tier 1
           planeType = "dr3";
           screen = "game";
           hintEl.textContent = "Tap or press SPACE to fly ✈️";
