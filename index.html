@@ -60,14 +60,14 @@
       font-size: 13px;
       pointer-events: none;
       max-width: 430px;
-      color: #ffeb3b; /* bright yellow text */
+      color: #ffeb3b;
     }
 
     .hud span.label {
       opacity: 0.9;
       font-weight: 400;
       margin-right: 4px;
-      color: #ffe082; /* softer yellow for labels */
+      color: #ffe082;
     }
 
     #lives {
@@ -87,7 +87,7 @@
       text-align: center;
       pointer-events: none;
       white-space: pre-line;
-      color: #ffeb3b; /* better visibility */
+      color: #ffeb3b;
     }
   </style>
 </head>
@@ -128,12 +128,12 @@
 
     const UI_FONT = "Segoe UI, Tahoma, Geneva, Verdana, sans-serif";
 
-   // === Online leaderboard backend (Google Apps Script) ===
-// READ: use the googleusercontent echo URL (shows {"top":[...]})
-const API_READ_URL = "https://script.googleusercontent.com/a/macros/flyboys.games/echo?user_content_key=AehSKLh-vfpm-b8LOVjEggy3lntDOFugimlaLS8ASBCibZwB2n7d1tsiDlRwjHEZyPSKrr-CPs3x3wMBX1jfpYgNIA2Jgfl6XycDXd1o4K21suGqQnBURbJRhA9ceAZ0uSUm9q3Px2yBfSnZ9wCEvtAkhGcs6z2i7p9lijbjoEsvAST9WKoHHr0npnb4-PD4Vq_XUhq-U7HWGNtDvRX01WAqhn1oYsK2ZhpAViC3fH9h9MoZLNASgn08DtKPNkUaLfhvZXFSqmIG-YM9jqovpftdQjgi-GufvQ_RkROhmywfidXdv5QFx1WhtPzAxpVN9Q&lib=MfwG337EoII1Bmsh7K-BOZuNCPjHlJrgC";
+    // === Online leaderboard backend (Google Apps Script) ===
+    // READ: global top via echo URL (returns {"top":[{name,score},...]})
+    const API_READ_URL = "https://script.googleusercontent.com/a/macros/flyboys.games/echo?user_content_key=AehSKLh-vfpm-b8LOVjEggy3lntDOFugimlaLS8ASBCibZwB2n7d1tsiDlRwjHEZyPSKrr-CPs3x3wMBX1jfpYgNIA2Jgfl6XycDXd1o4K21suGqQnBURbJRhA9ceAZ0uSUm9q3Px2yBfSnZ9wCEvtAkhGcs6z2i7p9lijbjoEsvAST9WKoHHr0npnb4-PD4Vq_XUhq-U7HWGNtDvRX01WAqhn1oYsK2ZhpAViC3fH9h9MoZLNASgn08DtKPNkUaLfhvZXFSqmIG-YM9jqovpftdQjgi-GufvQ_RkROhmywfidXdv5QFx1WhtPzAxpVN9Q&lib=MfwG337EoII1Bmsh7K-BOZuNCPjHlJrgC";
 
-// WRITE: use the /exec Web App URL (doPost -> appendRow)
-const API_WRITE_URL = "https://script.google.com/macros/s/AKfycbx2LX4H44GGE-wUsTZeR-ldi9p6xyk_AX4MaH2gbOLIZZGHtJlj7ncejmA85VrPqkqg1Q/exec";
+    // WRITE: append score via Web App URL (doPost)
+    const API_WRITE_URL = "https://script.google.com/macros/s/AKfycbx2LX4H44GGE-wUsTZeR-ldi9p6xyk_AX4MaH2gbOLIZZGHtJlj7ncejmA85VrPqkqg1Q/exec";
 
     // Screens: splash, planeSelectGerman, planeSelectBritish, game
     let screen = "splash";
@@ -164,7 +164,6 @@ const API_WRITE_URL = "https://script.google.com/macros/s/AKfycbx2LX4H44GGE-wUsT
     dr3Img.onerror = () => console.error("Could not load FokkerDR3.png");
     dr3Img.src = "FokkerDR3.png";
 
-    // NEW: Thumbnail for DR3
     const dr3ThumbImg = new Image();
     let dr3ThumbLoaded = false;
     dr3ThumbImg.onload = () => { dr3ThumbLoaded = true; };
@@ -260,159 +259,62 @@ const API_WRITE_URL = "https://script.google.com/macros/s/AKfycbx2LX4H44GGE-wUsT
     let obstacles;
     let score = 0;
 
-    // High score & leaderboard
+    // High score & leaderboard (local + global)
     let bestScore = parseInt(localStorage.getItem("ww1_fokker_best") || "0", 10);
     let bestPilotName = localStorage.getItem("ww1_fokker_best_pilot") || "-";
-
     let leaderboard = [];
 
-    // Local fallback save (for offline / caching)
+    // Save local cache of leaderboard for offline
     function saveLeaderboard() {
-      localStorage.setItem("ww1_leaderboard", JSON.stringify(leaderboard));
-    }
-
-    // Try to load leaderboard from server; fall back to localStorage if it fails
-async function initLeaderboard() {
-  // 1) Start from local cache so splash can show something immediately
-  const raw = localStorage.getItem("ww1_leaderboard");
-  if (raw) {
-    try {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        leaderboard = parsed;
-      }
-    } catch (e) {
-      leaderboard = [];
-    }
-  }
-
-  // 2) Try online server (Google Apps Script) for global top
-  try {
-    const res = await fetch(API_READ_URL);
-    if (res.ok) {
-      const data = await res.json();
-      if (data && Array.isArray(data.top)) {
-        leaderboard = data.top;
-        saveLeaderboard(); // cache for offline
-      }
-    }
-  } catch (err) {
-    console.log("Online leaderboard not available, using local only.", err);
-  }
-
-  // 3) Update bestScore / bestPilotName from leaderboard
-  if (leaderboard.length > 0) {
-    const top = leaderboard[0];
-    if (typeof top.score === "number") {
-      bestScore = top.score;
-      bestPilotName = top.name || "-";
-    }
-  }
-
-  bestEl.textContent = bestScore;
-  bestPilotEl.textContent = bestPilotName;
-
-  // If we are on splash, redraw to show updated Top Aces
-  if (screen === "splash") {
-    drawSplash();
-  }
-}
-// === Online leaderboard backend (Google Apps Script) ===
-// Use the googleusercontent URL that returns {"top":[...]}
-const API_URL = "https://script.googleusercontent.com/a/macros/flyboys.games/echo?user_content_key=AehSKLh-vfpm-b8LOVjEggy3lntDOFugimlaLS8ASBCibZwB2n7d1tsiDlRwjHEZyPSKrr-CPs3x3wMBX1jfpYgNIA2Jgfl6XycDXd1o4K21suGqQnBURbJRhA9ceAZ0uSUm9q3Px2yBfSnZ9wCEvtAkhGcs6z2i7p9lijbjoEsvAST9WKoHHr0npnb4-PD4Vq_XUhq-U7HWGNtDvRX01WAqhn1oYsK2ZhpAViC3fH9h9MoZLNASgn08DtKPNkUaLfhvZXFSqmIG-YM9jqovpftdQjgi-GufvQ_RkROhmywfidXdv5QFx1WhtPzAxpVN9Q&lib=MfwG337EoII1Bmsh7K-BOZuNCPjHlJrgC";
-
-// High score & leaderboard (local + global)
-let bestScore = parseInt(localStorage.getItem("ww1_fokker_best") || "0", 10);
-let bestPilotName = localStorage.getItem("ww1_fokker_best_pilot") || "-";
-
-let leaderboard = [];
-
-// Save local cache of leaderboard for offline
-function saveLeaderboard() {
-  try {
-    localStorage.setItem("ww1_leaderboard", JSON.stringify(leaderboard));
-  } catch (e) {
-    console.log("Cannot save leaderboard locally:", e);
-  }
-}
-
-// Fire-and-forget online submit (avoids CORS preflight)
-function sendScoreOnline(name, newScore) {
-  try {
-    fetch(API_URL, {
-      method: "POST",
-      mode: "no-cors",                         // <- important
-      headers: {
-        "Content-Type": "text/plain;charset=utf-8"  // <- "simple" request, no preflight
-      },
-      body: JSON.stringify({ name, score: newScore })
-    });
-  } catch (err) {
-    console.log("[WW1] Online score send failed (ignored):", err);
-  }
-}
-
-// Load leaderboard (local cache first, then server)
-async function initLeaderboard() {
-  // 1) Local cache so splash screen has something immediately
-  const raw = localStorage.getItem("ww1_leaderboard");
-  if (raw) {
-    try {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        leaderboard = parsed;
-      }
-    } catch (e) {
-      leaderboard = [];
-    }
-  }
-
-  // 2) Try online server (Google Apps Script)
-  try {
-    const res = await fetch(API_URL);
-    if (res.ok) {
-      const data = await res.json();
-      if (data && Array.isArray(data.top)) {
-        // Normalize rows coming from Apps Script
-        leaderboard = data.top.map(row => ({
-          name: row.name,
-          score: Number(row.score) || 0
-        }));
-        leaderboard.sort((a, b) => b.score - a.score);
-        saveLeaderboard(); // cache for offline
-      }
-    }
-  } catch (err) {
-    console.log("Online leaderboard not available, using local only.", err);
-  }
-
-  // 3) Update bestScore / bestPilotName from leaderboard
-  if (leaderboard.length > 0) {
-    bestScore = leaderboard[0].score;
-    bestPilotName = leaderboard[0].name || "-";
-  }
-
-  bestEl.textContent = bestScore;
-  bestPilotEl.textContent = bestPilotName;
-
-  // If we are on splash, redraw to show Top Aces
-  if (screen === "splash") {
-    drawSplash();
-  }
-}
-
-// call once on load
-initLeaderboard();
-// call once on load
-initLeaderboard();
-
-      // 2) Try online server (Google Apps Script)
       try {
-        const res = await fetch(API_URL);
+        localStorage.setItem("ww1_leaderboard", JSON.stringify(leaderboard));
+      } catch (e) {
+        console.log("Cannot save leaderboard locally:", e);
+      }
+    }
+
+    // Fire-and-forget online submit (no-cors to avoid Chrome preflight/CORS error)
+    function submitScoreOnline(name, newScore) {
+      try {
+        fetch(API_WRITE_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: {
+            "Content-Type": "text/plain;charset=utf-8"
+          },
+          body: JSON.stringify({ name, score: newScore })
+        });
+      } catch (err) {
+        console.log("Cannot submit score online (ignored):", err);
+      }
+    }
+
+    // Load leaderboard (local cache first, then server)
+    async function initLeaderboard() {
+      // 1) Local cache so splash has something immediately
+      const raw = localStorage.getItem("ww1_leaderboard");
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            leaderboard = parsed;
+          }
+        } catch (e) {
+          leaderboard = [];
+        }
+      }
+
+      // 2) Try online server (Google Apps Script echo URL)
+      try {
+        const res = await fetch(API_READ_URL);
         if (res.ok) {
           const data = await res.json();
           if (data && Array.isArray(data.top)) {
-            leaderboard = data.top;
+            leaderboard = data.top.map(row => ({
+              name: row.name,
+              score: Number(row.score) || 0
+            }));
+            leaderboard.sort((a, b) => b.score - a.score);
             saveLeaderboard(); // cache for offline
           }
         }
@@ -422,17 +324,14 @@ initLeaderboard();
 
       // 3) Update bestScore / bestPilotName from leaderboard
       if (leaderboard.length > 0) {
-        const top = leaderboard[0];
-        if (typeof top.score === "number") {
-          bestScore = top.score;
-          bestPilotName = top.name || "-";
-        }
+        bestScore = leaderboard[0].score;
+        bestPilotName = leaderboard[0].name || "-";
       }
 
       bestEl.textContent = bestScore;
       bestPilotEl.textContent = bestPilotName;
 
-      // If we are on splash, redraw to show updated Top Aces
+      // If we are on splash, redraw to show Top Aces
       if (screen === "splash") {
         drawSplash();
       }
@@ -491,51 +390,25 @@ initLeaderboard();
     }
 
     function updateLeaderboardForCurrentPilot() {
-  if (!currentPilotName) return;
+      if (!currentPilotName) return;
 
-  const name = currentPilotName;
-  const newScore = score;
+      const name = currentPilotName;
+      const newScore = score;
 
-  // 1) Update local leaderboard (as before)
-  let entry = leaderboard.find(e => e.name === name);
-  if (entry) {
-    if (newScore > entry.score) {
-      entry.score = newScore;
-    }
-  } else {
-    leaderboard.push({ name, score: newScore });
-  }
+      // 1) Update local leaderboard
+      let entry = leaderboard.find(e => e.name === name);
+      if (entry) {
+        if (newScore > entry.score) {
+          entry.score = newScore;
+        }
+      } else {
+        leaderboard.push({ name, score: newScore });
+      }
 
-  leaderboard.sort((a, b) => b.score - a.score);
-  if (leaderboard.length > 10) {
-    leaderboard.length = 10;
-  }
-
-  saveLeaderboard();
-
-  if (leaderboard.length > 0) {
-    bestScore = leaderboard[0].score;
-    bestPilotName = leaderboard[0].name || "-";
-    bestEl.textContent = bestScore;
-    bestPilotEl.textContent = bestPilotName;
-    localStorage.setItem("ww1_fokker_best", String(bestScore));
-    localStorage.setItem("ww1_fokker_best_pilot", bestPilotName);
-  }
-
-  // 2) Send the new score to the online API (fire & forget, no-cors to avoid Chrome CORS preflight)
-  try {
-    fetch(API_WRITE_URL, {
-      method: "POST",
-      mode: "no-cors", // <— important: no preflight, no CORS error
-      headers: {
-        "Content-Type": "text/plain;charset=utf-8"
-      },
-      body: JSON.stringify({ name, score: newScore })
-    });
-  } catch (err) {
-    console.log("Cannot submit score online (ignored):", err);
-  }
-}
+      leaderboard.sort((a, b) => b.score - a.score);
+      if (leaderboard.length > 10) {
+        leaderboard.length = 10;
+      }
 
       saveLeaderboard();
 
@@ -548,18 +421,8 @@ initLeaderboard();
         localStorage.setItem("ww1_fokker_best_pilot", bestPilotName);
       }
 
-      // 2) Send the new score to the online API (fire & forget)
-      try {
-        await fetch(API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, score: newScore })
-        });
-        // Optionally refresh from server so splash shows global Top Aces
-        initLeaderboard();
-      } catch (err) {
-        console.log("Cannot submit score online:", err);
-      }
+      // 2) Send the new score online (fire & forget)
+      submitScoreOnline(name, newScore);
     }
 
     function resetGame() {
@@ -1280,7 +1143,7 @@ initLeaderboard();
       hintEl.textContent = "Tap a side to enter";
     }
 
-    // ---------- GERMAN PLANE SELECT (uses DR3 thumbnail) ----------
+    // ---------- GERMAN PLANE SELECT ----------
     function drawGermanPlaneList() {
       if (screen !== "planeSelectGerman") return;
 
@@ -1327,7 +1190,6 @@ initLeaderboard();
         const thumbX = rowX + 20;
         const thumbY = y + (rowH - 14) / 2;
 
-        // Decide which image to show
         let imgToUse = null;
         if (entry.planeType === "dr3") {
           if (dr3ThumbLoaded)      imgToUse = dr3ThumbImg;
