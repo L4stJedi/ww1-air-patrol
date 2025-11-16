@@ -1,1404 +1,241 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>WW1 Air Patrol</title>
-
-  <!-- iPhone full-screen web app settings -->
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="FokkerDR3.png">
-
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html, body {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-    }
-
-    body {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: radial-gradient(circle at top, #aee1ff 0, #4d7fbf 60%, #1e2a3a 100%);
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      color: #f5f5f5;
-      -webkit-touch-callout: none;
-      -webkit-user-select: none;
-      touch-action: none;
-    }
-
-    .game-wrapper {
-      position: relative;
-      padding: 16px;
-      border-radius: 18px;
-      background: rgba(0, 0, 0, 0.25);
-      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(6px);
-    }
-
-    canvas {
-      display: block;
-      background: #6bb34d;
-      border-radius: 16px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-    }
-
-    .hud {
-      position: absolute;
-      top: 20px;
-      left: 24px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px 18px;
-      font-weight: 600;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
-      font-size: 13px;
-      pointer-events: none;
-      max-width: 430px;
-      color: #ffeb3b;
-    }
-
-    .hud span.label {
-      opacity: 0.9;
-      font-weight: 400;
-      margin-right: 4px;
-      color: #ffe082;
-    }
-
-    #lives {
-      color: #ff6666;
-      font-size: 16px;
-      letter-spacing: 2px;
-    }
-
-    .hint {
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 14px;
-      opacity: 0.95;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
-      text-align: center;
-      pointer-events: none;
-      white-space: pre-line;
-      color: #ffeb3b;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WW1 Air Patrol</title>
+<style>
+  body { margin: 0; background: #87CEEB; overflow: hidden; font-family: Segoe UI, Tahoma; }
+  canvas { display: block; margin: 0 auto; background: #87CEEB; }
+</style>
 </head>
 <body>
-  <div class="game-wrapper">
-    <canvas id="game" width="480" height="640"></canvas>
+<canvas id="gameCanvas" width="900" height="600"></canvas>
+<script>
 
-    <div class="hud">
-      <div><span class="label">Score:</span><span id="score">0</span></div>
-      <div><span class="label">Best:</span><span id="best">0</span></div>
-      <div><span class="label">Stage:</span><span id="levelName">Fokker Eindecker</span></div>
-      <div><span class="label">Lives:</span><span id="lives">❤❤❤</span></div>
-      <div><span class="label">Pilot:</span><span id="currentPilot">-</span></div>
-      <div><span class="label">Top Ace:</span><span id="bestPilot">-</span></div>
-    </div>
+// === CONFIG ===
+const API_URL = "https://script.google.com/macros/s/AKfycbx2LX4H44GGE-wUsTZeR-ldi9p6xyk_AX4MaH2gbOLIZZGHtJlj7ncejmA85VrPqkqg1Q/exec";
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+const W = canvas.width;
+const H = canvas.height;
+const GROUND_HEIGHT = 90;
+const UI_FONT = "20px Segoe UI";
 
-    <div class="hint" id="hint">
-      Tap a side to enter
-    </div>
-  </div>
+// === IMAGES ===
+const planeImg = new Image();
+planeImg.src = "images/FokkerDR3.png";
 
-  <script>
-    const canvas = document.getElementById("game");
-    /** @type {CanvasRenderingContext2D} */
-    const ctx = canvas.getContext("2d");
+const landscapeImg = new Image();
+landscapeImg.src = "images/landscape.png";
 
-    const scoreEl = document.getElementById("score");
-    const bestEl = document.getElementById("best");
-    const hintEl = document.getElementById("hint");
-    const levelNameEl = document.getElementById("levelName");
-    const livesEl = document.getElementById("lives");
-    const currentPilotEl = document.getElementById("currentPilot");
-    const bestPilotEl = document.getElementById("bestPilot");
+const obsBaloonImg = new Image();
+obsBaloonImg.src = "images/ObsBaloon.png";
 
-    // === Your Apps Script endpoint for global scores ===
-    const API_URL = "https://script.google.com/macros/s/AKfycbx2LX4H44GGE-wUsTZeR-ldi9p6xyk_AX4MaH2gbOLIZZGHtJlj7ncejmA85VrPqkqg1Q/exec";
-    const W = canvas.width;
-    const H = canvas.height;
-    const GROUND_HEIGHT = 90;
-    const UI_FONT = "Segoe UI, Tahoma, Geneva, Verdana, sans-serif";
+const zeppelinImg = new Image();
+zeppelinImg.src = "images/Zeppelin.png";
 
-    // Screens: splash, planeSelectGerman, planeSelectBritish, game
-    let screen = "splash";
+// === GAME STATE ===
+let screen = "splash";
+let pilotName = "";
+let nameInputActive = true;
 
-    let germanEntryRect = null;
-    let britishEntryRect = null;
-    let germanPlaneChoices = [];
+let planeX = 120;
+let planeY = 260;
+let planeVY = 0;
+let gravity = 0.45;
+let flapStrength = -8;
+let score = 0;
+let bestLocalScore = 0;
+let obstacles = [];
+let gameRunning = false;
+let sentOnline = false;
 
-    function fillRoundedRect(x, y, w, h, r) {
-      ctx.beginPath();
-      ctx.moveTo(x + r, y);
-      ctx.lineTo(x + w - r, y);
-      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-      ctx.lineTo(x + w, y + h - r);
-      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-      ctx.lineTo(x + r, y + h);
-      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-      ctx.lineTo(x, y + r);
-      ctx.quadraticCurveTo(x, y, x + r, y);
-      ctx.closePath();
-      ctx.fill();
+// === LOAD LOCAL BEST ===
+bestLocalScore = Number(localStorage.getItem("bestScore") || 0);
+
+// === OBSTACLE CREATION ===
+function createObstacle() {
+  const gap = 180;
+  const topHeight = Math.random() * (H - GROUND_HEIGHT - gap - 100) + 50;
+  const bottomY = topHeight + gap;
+  const speed = 3;
+
+  obstacles.push({
+    x: W + 50,
+    topHeight,
+    bottomY,
+    width: 80,
+    speed,
+    sprite: Math.random() < 0.5 ? obsBaloonImg : zeppelinImg
+  });
+}
+
+// === RESET ===
+function resetGame() {
+  planeY = 260;
+  planeVY = 0;
+  obstacles = [];
+  score = 0;
+  sentOnline = false;
+  gameRunning = false;
+}
+
+// === FLAP ===
+function flap() {
+  planeVY = flapStrength;
+}
+
+// === UPDATE ===
+function updateGame() {
+  planeVY += gravity;
+  planeY += planeVY;
+
+  obstacles.forEach((o) => {
+    o.x -= o.speed;
+  });
+
+  if (obstacles.length > 0 && obstacles[0].x < -120) {
+    obstacles.shift();
+  }
+
+  if (Math.random() < 0.015) createObstacle();
+
+  obstacles.forEach((o) => {
+    if (planeX + 60 > o.x && planeX < o.x + o.width) {
+      if (planeY < o.topHeight || planeY + 40 > o.bottomY) {
+        screen = "gameover";
+      }
     }
+  });
 
-    // === Load sprites ===
-    const dr3Img = new Image();
-    let dr3Loaded = false;
-    dr3Img.onload = () => { dr3Loaded = true; };
-    dr3Img.onerror = () => console.error("Could not load FokkerDR3.png");
-    dr3Img.src = "FokkerDR3.png";
+  if (planeY + 40 > H - GROUND_HEIGHT) {
+    screen = "gameover";
+  }
 
-    const dr3ThumbImg = new Image();
-    let dr3ThumbLoaded = false;
-    dr3ThumbImg.onload = () => { dr3ThumbLoaded = true; };
-    dr3ThumbImg.onerror = () => console.error("Could not load FokkerDR3_Thumbnail.png");
-    dr3ThumbImg.src = "FokkerDR3_Thumbnail.png";
+  if (screen === "game") score++;
+}
 
-    const dr1Img = new Image();
-    let dr1Loaded = false;
-    dr1Img.onload = () => { dr1Loaded = true; };
-    dr1Img.onerror = () => console.error("Could not load FokkerDR1.png");
-    dr1Img.src = "FokkerDR1.png";
+// === DRAW ===
+function drawGame() {
+  ctx.clearRect(0, 0, W, H);
 
-    const dviiImg = new Image();
-    let dviiLoaded = false;
-    dviiImg.onload = () => { dviiLoaded = true; };
-    dviiImg.onerror = () => console.error("Could not load FokkerDVII.png");
-    dviiImg.src = "FokkerDVII.png";
+  ctx.drawImage(landscapeImg, 0, H - GROUND_HEIGHT, W, GROUND_HEIGHT);
 
-    const balloonImg = new Image();
-    let balloonLoaded = false;
-    balloonImg.onload = () => { balloonLoaded = true; };
-    balloonImg.onerror = () => console.error("Could not load ObsBaloon.png");
-    balloonImg.src = "ObsBaloon.png";
+  obstacles.forEach((o) => {
+    ctx.drawImage(o.sprite, o.x, o.topHeight - 60, o.width, 60);
+    ctx.drawImage(o.sprite, o.x, o.bottomY, o.width, 60);
+  });
 
-    const zeppelinImg = new Image();
-    let zeppelinLoaded = false;
-    zeppelinImg.onload = () => { zeppelinLoaded = true; };
-    zeppelinImg.onerror = () => console.error("Could not load Zeppelin.png");
-    zeppelinImg.src = "Zeppelin.png";
+  ctx.drawImage(planeImg, planeX - 30, planeY - 20, 60, 40);
 
-    const diegoImg = new Image();
-    let diegoLoaded = false;
-    diegoImg.onload = () => { diegoLoaded = true; };
-    diegoImg.onerror = () => console.error("Could not load DiegoPilot.png");
-    diegoImg.src = "DiegoPilot.png";
+  ctx.fillStyle = "#fff";
+  ctx.font = UI_FONT;
+  ctx.fillText(`Score: ${score}`, 20, 40);
+  ctx.fillText(`Best: ${bestLocalScore}`, 20, 70);
+}
 
-    const splashLogo = new Image();
-    let splashLogoLoaded = false;
-    splashLogo.onload = () => { splashLogoLoaded = true; drawSplash(); };
-    splashLogo.onerror = () => console.error("Could not load Logo.png");
-    splashLogo.src = "Logo.png";
+// === SPLASH ===
+function drawSplash() {
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = "#fff";
+  ctx.font = "32px Segoe UI";
+  ctx.fillText("WW1 AIR PATROL", W/2 - 140, 120);
 
-    const LEVELS = [
-      {
-        name: "Fokker Eindecker",
-        obstacle: "cloud",
-        speed: 2.4,
-        spawnInterval: 1400,
-        gravity: 0.28,
-        jump: -6.5,
-        sky: ["#cbdaf0", "#f2f5fb"],
-        ground: ["#c9b884", "#9f8957"]
+  ctx.font = "22px Segoe UI";
+  ctx.fillText("Enter Pilot Name:", W/2 - 110, 200);
+  ctx.fillText(pilotName || "_", W/2 - 20, 240);
+  ctx.font = "18px Segoe UI";
+  ctx.fillText("PRESS TAP OR SPACE TO START", W/2 - 150, 320);
+}
+
+// === GAME OVER ===
+function drawGameOver() {
+  ctx.clearRect(0, 0, W, H);
+
+  ctx.fillStyle = "#fff";
+  ctx.font = "36px Segoe UI";
+  ctx.fillText("GAME OVER", W/2 - 110, 140);
+
+  ctx.font = "26px Segoe UI";
+  ctx.fillText(`Score: ${score}`, W/2 - 60, 200);
+  ctx.fillText(`Best: ${bestLocalScore}`, W/2 - 60, 240);
+
+  ctx.font = "18px Segoe UI";
+  ctx.fillText("TAP OR SPACE TO RESTART", W/2 - 130, 320);
+}
+
+// === ONLINE SCORE ===
+function sendScoreOnline(name, newScore) {
+  try {
+    fetch(API_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8"
       },
-      {
-        name: "Observation Balloons",
-        obstacle: "balloon",
-        speed: 2.8,
-        spawnInterval: 1200,
-        gravity: 0.32,
-        jump: -7.0,
-        sky: ["#e3e3e3", "#cfcfcf"],
-        ground: ["#b2c18a", "#7a9153"]
-      },
-      {
-        name: "Zeppelin Raid",
-        obstacle: "zeppelin",
-        speed: 3.0,
-        spawnInterval: 1150,
-        gravity: 0.33,
-        jump: -7.2,
-        sky: ["#9aa7c3", "#d8dde7"],
-        ground: ["#8c8b6a", "#494736"]
-      },
-      {
-        name: "Ace of Aces",
-        obstacle: "flak",
-        speed: 3.4,
-        spawnInterval: 1000,
-        gravity: 0.35,
-        jump: -7.4,
-        sky: ["#5b7b9a", "#cfd7e0"],
-        ground: ["#5c6b40", "#2f3a20"]
-      }
-    ];
-
-    const PLANE_WIDTH = 52;
-    const PLANE_HEIGHT = 28;
-    const PLANE_X = 90;
-
-    let currentLevelIndex = 0;
-
-    let plane;
-    let obstacles;
-    let score = 0;
-
-    // === Local high score & leaderboard (per device) ===
-    let bestScore = parseInt(localStorage.getItem("ww1_fokker_best") || "0", 10);
-    let bestPilotName = localStorage.getItem("ww1_fokker_best_pilot") || "-";
-
-    let leaderboard = [];
-
-    function saveLeaderboard() {
-      localStorage.setItem("ww1_leaderboard", JSON.stringify(leaderboard));
-    }
-
-    (function initLeaderboard() {
-      const raw = localStorage.getItem("ww1_leaderboard");
-      if (raw) {
-        try {
-          const parsed = JSON.parse(raw);
-          if (Array.isArray(parsed)) {
-            leaderboard = parsed;
-          }
-        } catch (e) {
-          leaderboard = [];
-        }
-      }
-      if (leaderboard.length > 0) {
-        bestScore = leaderboard[0].score;
-        bestPilotName = leaderboard[0].name || "-";
-      } else {
-        if (bestScore > 0 && bestPilotName && bestPilotName !== "-") {
-          leaderboard.push({ name: bestPilotName, score: bestScore });
-          leaderboard.sort((a, b) => b.score - a.score);
-          saveLeaderboard();
-        }
-      }
-    })();
-
-    let currentPilotName = "";
-    const lastPilot = localStorage.getItem("ww1_last_pilot");
-    if (lastPilot) {
-      currentPilotName = lastPilot;
-    }
-
-    let dr1Unlocked = localStorage.getItem("dr1_unlocked") === "1";
-
-    let lives = 3;
-    let damageLevel = 0;
-
-    let gameRunning = false;
-    let gameOver = false;
-    let lastTime = 0;
-    let lastSpawnTime = 0;
-
-    const parallax = { far: 0, mid: 0, fore: 0 };
-
-    let planeType = "dr3";
-
-    scoreEl.textContent = score;
-    bestEl.textContent = bestScore;
-    levelNameEl.textContent = LEVELS[currentLevelIndex].name;
-    bestPilotEl.textContent = bestPilotName;
-    currentPilotEl.textContent = currentPilotName || "-";
-
-    function updateLivesDisplay() {
-      let hearts = "";
-      for (let i = 0; i < lives; i++) hearts += "❤";
-      livesEl.textContent = hearts;
-    }
-
-    updateLivesDisplay();
-
-    function ensurePilotName() {
-      if (!currentPilotName) {
-        let name = prompt("Enter pilot name:", "");
-        if (name) {
-          name = name.trim();
-        }
-        if (!name) {
-          name = "Unknown";
-        }
-        currentPilotName = name;
-        currentPilotEl.textContent = currentPilotName;
-        localStorage.setItem("ww1_last_pilot", currentPilotName);
-      }
-    }
-
-    // === Fire-and-forget online score send (no-cors to avoid CORS) ===
-    function sendScoreOnline(name, newScore) {
-      try {
-        fetch(API_URL, {
-          method: "POST",
-          mode: "no-cors",
-          headers: {
-            "Content-Type": "text/plain;charset=utf-8"
-          },
-          body: JSON.stringify({ name, score: newScore })
-        });
-      } catch (err) {
-        console.log("[WW1] Online score send failed (ignored):", err);
-      }
-    }
-
-    function updateLeaderboardForCurrentPilot() {
-      if (!currentPilotName) return;
-
-      const name = currentPilotName;
-      const newScore = score;
-
-      let entry = leaderboard.find(e => e.name === name);
-      if (entry) {
-        if (newScore > entry.score) {
-          entry.score = newScore;
-        }
-      } else {
-        leaderboard.push({ name, score: newScore });
-      }
-
-      leaderboard.sort((a, b) => b.score - a.score);
-      if (leaderboard.length > 10) {
-        leaderboard.length = 10;
-      }
-
-      saveLeaderboard();
-
-      if (leaderboard.length > 0) {
-        bestScore = leaderboard[0].score;
-        bestPilotName = leaderboard[0].name || "-";
-        bestEl.textContent = bestScore;
-        bestPilotEl.textContent = bestPilotName;
-        localStorage.setItem("ww1_fokker_best", String(bestScore));
-        localStorage.setItem("ww1_fokker_best_pilot", bestPilotName);
-      }
-
-      // Send to global leaderboard (Google Sheet)
-      sendScoreOnline(name, newScore);
-    }
-
-    function resetGame() {
-      plane = {
-        x: PLANE_X,
-        y: H / 2,
-        width: PLANE_WIDTH,
-        height: PLANE_HEIGHT,
-        vy: 0,
-        invincibleUntil: 0
-      };
-      obstacles = [];
-      score = 0;
-      lives = 3;
-      damageLevel = 0;
-      scoreEl.textContent = score;
-      updateLivesDisplay();
-      lastTime = 0;
-      lastSpawnTime = 0;
-      gameOver = false;
-      gameRunning = false;
-      currentLevelIndex = 0;
-      levelNameEl.textContent = LEVELS[currentLevelIndex].name;
-      parallax.far = 0;
-      parallax.mid = 0;
-      parallax.fore = 0;
-    }
-
-    function startGameLoop() {
-      if (!gameRunning && !gameOver) {
-        gameRunning = true;
-        requestAnimationFrame(loop);
-      }
-    }
-
-    function flap() {
-      const level = LEVELS[currentLevelIndex];
-      plane.vy = level.jump;
-    }
-
-    function updateLevelByScore() {
-      let newIndex = 0;
-      if (score >= 30) newIndex = 3;
-      else if (score >= 20) newIndex = 2;
-      else if (score >= 10) newIndex = 1;
-      else newIndex = 0;
-
-      if (newIndex !== currentLevelIndex) {
-        currentLevelIndex = newIndex;
-        levelNameEl.textContent = LEVELS[currentLevelIndex].name;
-      }
-    }
-
-    function checkUnlocks() {
-      if (!dr1Unlocked && currentLevelIndex === 3 && score >= 40) {
-        dr1Unlocked = true;
-        localStorage.setItem("dr1_unlocked", "1");
-        hintEl.textContent = "Fokker DR.1 unlocked! Use German → Tier 2 to select it.";
-      }
-    }
-
-    function spawnObstacle(timestamp) {
-      const level = LEVELS[currentLevelIndex];
-      if (!lastSpawnTime) lastSpawnTime = timestamp;
-      if (timestamp - lastSpawnTime < level.spawnInterval) return;
-
-      lastSpawnTime = timestamp;
-
-      const marginTop = 80;
-      const marginBottom = 80;
-      const yMin = marginTop;
-      const yMax = H - GROUND_HEIGHT - marginBottom;
-      const baseY = Math.random() * (yMax - yMin) + yMin;
-
-      let obstacleType = level.obstacle;
-
-      if (currentLevelIndex === 3) {
-        if (score >= 500) {
-          const r = Math.random();
-          obstacleType = (r < 0.6) ? "flak" : "zeppelin";
-        } else if (score >= 400) {
-          const r = Math.random();
-          obstacleType = (r < 0.6) ? "flak" : "balloon";
-        } else if (score >= 300) {
-          const r = Math.random();
-          obstacleType = (r < 0.7) ? "flak" : "cloud";
-        } else {
-          obstacleType = "flak";
-        }
-      }
-
-      const radius = obstacleType === "zeppelin" ? 40 : 26;
-
-      obstacles.push({
-        x: W + radius + 10,
-        y: baseY,
-        baseY,
-        r: radius,
-        type: obstacleType,
-        scored: false,
-        phase: Math.random() * Math.PI * 2
-      });
-    }
-
-    function registerHit(timestamp) {
-      if (plane.invincibleUntil && timestamp < plane.invincibleUntil) {
-        return false;
-      }
-
-      plane.invincibleUntil = timestamp + 900;
-      damageLevel++;
-      lives = Math.max(0, lives - 1);
-      updateLivesDisplay();
-
-      if (damageLevel >= 3 || lives <= 0) {
-        damageLevel = 3;
-        endGame();
-        return true;
-      }
-      return false;
-    }
-
-    function update(dt, timestamp) {
-      const level = LEVELS[currentLevelIndex];
-
-      let levelSpeed = level.speed;
-
-      if (currentLevelIndex === 3 && score >= 150) {
-        const extraSteps = Math.floor((score - 150) / 50) + 1;
-        const extra = extraSteps * 0.25;
-        levelSpeed += extra;
-      }
-
-      let planeSpeedFactor = 1.0;
-      if (planeType === "dr3") {
-        planeSpeedFactor = 0.9;
-      } else if (planeType === "dr1") {
-        planeSpeedFactor = 1.0;
-      } else if (planeType === "diego") {
-        planeSpeedFactor = 1.0;
-      } else if (planeType === "dvii") {
-        planeSpeedFactor = 1.1;
-      }
-
-      levelSpeed *= planeSpeedFactor;
-
-      const speedFactor = dt / (1000 / 60);
-
-      plane.vy += level.gravity * speedFactor;
-      plane.y += plane.vy * speedFactor;
-
-      spawnObstacle(timestamp);
-
-      for (const o of obstacles) {
-        o.x -= levelSpeed * speedFactor;
-
-        let amp = 0;
-        let freq = 0;
-        if (o.type === "balloon") {
-          amp = 10;
-          freq = 0.003;
-        } else if (o.type === "zeppelin") {
-          amp = 6;
-          freq = 0.002;
-        }
-        if (amp > 0) {
-          o.y = o.baseY + Math.sin(timestamp * freq + o.phase) * amp;
-        }
-      }
-
-      obstacles = obstacles.filter(o => o.x + o.r > -20);
-
-      const base = levelSpeed * speedFactor;
-      parallax.far -= base * 0.3;
-      parallax.mid -= base * 0.6;
-      parallax.fore -= base * 1.0;
-
-      if (plane.y < 0 || plane.y + plane.height > H - GROUND_HEIGHT) {
-        damageLevel = 3;
-        lives = 0;
-        updateLivesDisplay();
-        endGame();
-        return;
-      }
-
-      const planeCx = plane.x + plane.width / 2;
-      const planeCy = plane.y + plane.height / 2;
-      let planeFactor = 0.6;
-      if (planeType === "dr1") planeFactor = 0.7;
-      if (planeType === "diego") planeFactor = 0.55;
-      if (planeType === "dvii") planeFactor = 0.65;
-      const planeR = Math.min(plane.width, plane.height) * planeFactor;
-
-      for (const o of obstacles) {
-        const dx = planeCx - o.x;
-        const dy = planeCy - o.y;
-        const distSq = dx * dx + dy * dy;
-        const rad = planeR + o.r + 3;
-        if (distSq < rad * rad) {
-          const gameEnded = registerHit(timestamp);
-          if (gameEnded) return;
-          plane.vy = -3;
-        }
-
-        if (!o.scored && o.x + o.r < plane.x) {
-          o.scored = true;
-          score++;
-          scoreEl.textContent = score;
-
-          if (score > bestScore) {
-            bestScore = score;
-            bestPilotName = currentPilotName || bestPilotName || "Unknown";
-            bestEl.textContent = bestScore;
-            bestPilotEl.textContent = bestPilotName;
-            localStorage.setItem("ww1_fokker_best", String(bestScore));
-            localStorage.setItem("ww1_fokker_best_pilot", bestPilotName);
-          }
-
-          updateLeaderboardForCurrentPilot();
-          updateLevelByScore();
-          checkUnlocks();
-        }
-      }
-    }
-
-    function drawBackground() {
-      const level = LEVELS[currentLevelIndex];
-
-      ctx.clearRect(0, 0, W, H);
-
-      const skyGradient = ctx.createLinearGradient(0, 0, 0, H - GROUND_HEIGHT);
-      skyGradient.addColorStop(0, level.sky[0]);
-      skyGradient.addColorStop(1, level.sky[1]);
-      ctx.fillStyle = skyGradient;
-      ctx.fillRect(0, 0, W, H - GROUND_HEIGHT);
-
-      ctx.fillStyle = "rgba(255,255,255,0.7)";
-      drawCloudShape(80, 90, 22);
-      drawCloudShape(180, 60, 18);
-      drawCloudShape(340, 110, 26);
-
-      const groundGradient = ctx.createLinearGradient(0, H - GROUND_HEIGHT, 0, H);
-      groundGradient.addColorStop(0, level.ground[0]);
-      groundGradient.addColorStop(1, level.ground[1]);
-      ctx.fillStyle = groundGradient;
-      ctx.fillRect(0, H - GROUND_HEIGHT, W, GROUND_HEIGHT);
-
-      drawParallaxGround();
-    }
-
-    function drawParallaxGround() {
-      const groundTop = H - GROUND_HEIGHT;
-      const farY = groundTop + 16;
-      const midY = groundTop + 30;
-      const foreY = groundTop + 40;
-
-      const farSegW = 140;
-      let fx = parallax.far % farSegW;
-      if (fx > 0) fx -= farSegW;
-
-      ctx.fillStyle = "#3e5136";
-      for (let x = fx; x < W + farSegW; x += farSegW) {
-        ctx.beginPath();
-        ctx.moveTo(x, H);
-        ctx.lineTo(x, farY + 18);
-        ctx.quadraticCurveTo(
-          x + farSegW * 0.25, farY - 6,
-          x + farSegW * 0.5, farY + 10
-        );
-        ctx.quadraticCurveTo(
-          x + farSegW * 0.75, farY + 24,
-          x + farSegW, farY + 12
-        );
-        ctx.lineTo(x + farSegW, H);
-        ctx.closePath();
-        ctx.fill();
-      }
-
-      const midSegW = 110;
-      let mx = parallax.mid % midSegW;
-      if (mx > 0) mx -= midSegW;
-
-      for (let x = mx; x < W + midSegW; x += midSegW) {
-        ctx.fillStyle = "#7e653e";
-        ctx.fillRect(x, midY + 4, midSegW * 0.7, 8);
-
-        ctx.fillStyle = "#5b4a30";
-        ctx.beginPath();
-        ctx.ellipse(x + midSegW * 0.35, midY + 10, 10, 4, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.strokeStyle = "rgba(40,30,20,0.9)";
-        ctx.lineWidth = 1.3;
-        ctx.beginPath();
-        ctx.moveTo(x + 6, midY);
-        ctx.lineTo(x + 6, midY - 8);
-        ctx.moveTo(x + 26, midY);
-        ctx.lineTo(x + 26, midY - 7);
-        ctx.stroke();
-
-        ctx.strokeStyle = "rgba(80,60,40,0.8)";
-        ctx.lineWidth = 0.9;
-        ctx.beginPath();
-        ctx.moveTo(x + 6, midY - 7);
-        ctx.lineTo(x + 26, midY - 6);
-        ctx.stroke();
-      }
-
-      const foreSegW = 130;
-      let bx = parallax.fore % foreSegW;
-      if (bx > 0) bx -= foreSegW;
-
-      for (let x = bx; x < W + foreSegW; x += foreSegW) {
-        ctx.fillStyle = "#4a3b26";
-        ctx.beginPath();
-        ctx.moveTo(x, foreY + 10);
-        ctx.lineTo(x + 18, foreY + 4);
-        ctx.lineTo(x + 40, foreY + 12);
-        ctx.lineTo(x + 68, foreY + 6);
-        ctx.lineTo(x + 92, foreY + 14);
-        ctx.lineTo(x + foreSegW, foreY + 8);
-        ctx.lineTo(x + foreSegW, H);
-        ctx.lineTo(x, H);
-        ctx.closePath();
-        ctx.fill();
-
-        ctx.fillStyle = "#34312c";
-        const bunkX = x + 24;
-        const bunkY = foreY - 6;
-        ctx.fillRect(bunkX, bunkY, 32, 16);
-
-        ctx.fillStyle = "#1b1a18";
-        ctx.fillRect(bunkX + 8, bunkY + 7, 18, 7);
-
-        const smokeBaseX = bunkX + 26;
-        const smokeBaseY = bunkY - 4;
-        ctx.fillStyle = "rgba(90,90,90,0.6)";
-        ctx.beginPath();
-        ctx.arc(smokeBaseX, smokeBaseY, 6, 0, Math.PI * 2);
-        ctx.arc(smokeBaseX + 6, smokeBaseY - 6, 5, 0, Math.PI * 2);
-        ctx.arc(smokeBaseX - 4, smokeBaseY - 10, 4, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-
-    function drawCloudShape(cx, cy, r) {
-      ctx.beginPath();
-      ctx.arc(cx - r, cy, r, Math.PI * 0.5, Math.PI * 1.5);
-      ctx.arc(cx, cy - r, r, Math.PI, 0);
-      ctx.arc(cx + r, cy, r, Math.PI * 1.5, Math.PI * 0.5);
-      ctx.closePath();
-      ctx.fill();
-    }
-
-    function drawStar6(cx, cy, outerR, innerR, color, alpha) {
-      ctx.save();
-      ctx.globalAlpha = alpha;
-      ctx.fillStyle = color;
-
-      ctx.beginPath();
-      const spikes = 6;
-      const step = Math.PI / spikes;
-      let rot = -Math.PI / 2;
-
-      for (let i = 0; i < spikes * 2; i++) {
-        const r = (i % 2 === 0) ? outerR : innerR;
-        const x = cx + Math.cos(rot) * r;
-        const y = cy + Math.sin(rot) * r;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-        rot += step;
-      }
-      ctx.closePath();
-      ctx.fill();
-      ctx.restore();
-    }
-
-    function drawFlakCloud(cx, cy, baseR) {
-      const R = baseR * 1.3;
-
-      ctx.save();
-      ctx.globalAlpha = 0.7;
-      ctx.fillStyle = "rgb(40,40,40)";
-
-      ctx.beginPath();
-      ctx.arc(cx, cy, R * 0.8, 0, Math.PI * 2);
-      ctx.arc(cx - R * 0.6, cy, R * 0.75, 0, Math.PI * 2);
-      ctx.arc(cx + R * 0.6, cy, R * 0.75, 0, Math.PI * 2);
-      ctx.arc(cx, cy - R * 0.6, R * 0.7, 0, Math.PI * 2);
-      ctx.arc(cx, cy + R * 0.6, R * 0.7, 0, Math.PI * 2);
-      ctx.arc(cx - R * 0.45, cy - R * 0.45, R * 0.65, 0, Math.PI * 2);
-      ctx.arc(cx + R * 0.45, cy + R * 0.45, R * 0.65, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    }
-
-    function drawObstacle(o) {
-      if (o.type === "cloud") {
-        ctx.fillStyle = "rgba(255,255,255,0.95)";
-        drawCloudShape(o.x, o.y, o.r);
-      } else if (o.type === "balloon") {
-        if (balloonLoaded) {
-          const scale = 0.45;
-          const imgW = balloonImg.width * scale;
-          const imgH = balloonImg.height * scale;
-          ctx.drawImage(
-            balloonImg,
-            o.x - imgW / 2,
-            o.y - imgH / 2,
-            imgW,
-            imgH
-          );
-        } else {
-          ctx.fillStyle = "#e0c68b";
-          ctx.beginPath();
-          ctx.arc(o.x, o.y, o.r, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      } else if (o.type === "zeppelin") {
-        if (zeppelinLoaded) {
-          const scale = 0.45;
-          const imgW = zeppelinImg.width * scale;
-          const imgH = zeppelinImg.height * scale;
-          ctx.drawImage(
-            zeppelinImg,
-            o.x - imgW / 2,
-            o.y - imgH / 2,
-            imgW,
-            imgH
-          );
-        } else {
-          ctx.fillStyle = "#c6b38c";
-          ctx.beginPath();
-          ctx.ellipse(o.x, o.y, o.r * 1.7, o.r, 0, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      } else if (o.type === "flak") {
-        const baseR = o.r;
-        drawFlakCloud(o.x, o.y, baseR);
-
-        const cloudR = baseR * 1.3;
-        const outerStar = cloudR / 3;
-        const midStar   = outerStar * 0.7;
-        const innerStar = outerStar * 0.5;
-
-        drawStar6(o.x, o.y, outerStar, midStar, "#f44336", 0.6);
-        drawStar6(o.x, o.y, midStar,   innerStar, "#ff9800", 0.8);
-        drawStar6(o.x, o.y, innerStar, innerStar * 0.6, "#fff176", 0.95);
-      }
-    }
-
-    function drawSmokePuff(cx, cy, baseR, alpha, shade) {
-      ctx.save();
-      ctx.globalAlpha = alpha;
-      ctx.fillStyle = shade;
-
-      ctx.beginPath();
-      ctx.arc(cx - baseR * 0.4, cy, baseR * 0.9, 0, Math.PI * 2);
-      ctx.arc(cx + baseR * 0.2, cy - baseR * 0.3, baseR * 0.75, 0, Math.PI * 2);
-      ctx.arc(cx + baseR * 0.5, cy + baseR * 0.1, baseR * 0.6, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.restore();
-    }
-
-    function drawPlane() {
-      const { x, y, width, height } = plane;
-      const cx = x + width * 0.5;
-      const cy = y + height * 0.5;
-
-      let img, loaded, scale;
-
-      if (planeType === "diego") {
-        img = diegoImg;
-        loaded = diegoLoaded;
-        scale = 0.45;
-      } else if (planeType === "dr1") {
-        img = dr1Img;
-        loaded = dr1Loaded;
-        scale = 0.25;
-      } else if (planeType === "dvii") {
-        img = dviiImg;
-        loaded = dviiLoaded;
-        scale = 0.26;
-      } else {
-        img = dr3Img;
-        loaded = dr3Loaded;
-        scale = 0.45;
-      }
-
-      if (!loaded) {
-        ctx.fillStyle = "red";
-        fillRoundedRect(x, y, width, height, 4);
-        return;
-      }
-
-      const imgWidth = img.width * scale;
-      const imgHeight = img.height * scale;
-
-      ctx.drawImage(
-        img,
-        cx - imgWidth / 2,
-        cy - imgHeight / 2,
-        imgWidth,
-        imgHeight
-      );
-
-      const noseX = cx + imgWidth * 0.35;
-      const noseY = cy;
-
-      if (damageLevel >= 1 && damageLevel < 3) {
-        const R = imgWidth * 0.09;
-
-        drawSmokePuff(
-          noseX - 4,
-          noseY - 6,
-          R,
-          0.8,
-          "rgb(90,90,90)"
-        );
-
-        drawSmokePuff(
-          noseX - 14,
-          noseY - 10,
-          R * 1.5,
-          0.6,
-          "rgb(120,120,120)"
-        );
-
-        drawSmokePuff(
-          noseX - 28,
-          noseY - 14,
-          R * 2.0,
-          0.4,
-          "rgb(150,150,150)"
-        );
-      }
-
-      if (damageLevel >= 2 && damageLevel < 3) {
-        ctx.beginPath();
-        ctx.moveTo(noseX + 2, noseY - 4);
-        ctx.quadraticCurveTo(noseX + 14, noseY - 22, noseX + 4, noseY - 10);
-        ctx.quadraticCurveTo(noseX - 2, noseY - 16, noseX + 2, noseY - 4);
-        ctx.fillStyle = "rgba(255,160,0,0.9)";
-        ctx.fill();
-      }
-
-      if (damageLevel >= 3) {
-        ctx.save();
-        ctx.globalAlpha = 0.9;
-        const explodeR = imgWidth * 0.6;
-        const grad = ctx.createRadialGradient(
-          cx, cy, explodeR * 0.2,
-          cx, cy, explodeR
-        );
-        grad.addColorStop(0, "rgba(255,255,255,1)");
-        grad.addColorStop(0.3, "rgba(255,200,0,1)");
-        grad.addColorStop(0.7, "rgba(255,80,0,0.9)");
-        grad.addColorStop(1, "rgba(80,20,0,0)");
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(cx, cy, explodeR, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      }
-    }
-
-    function drawFogOverlay() {
-      if (score < 100) return;
-
-      const extra = Math.min((score - 100) * 0.003, 0.25);
-      const alphaBottom = 0.30 + extra;
-      const alphaTop = alphaBottom * 0.8;
-
-      ctx.save();
-      const grad = ctx.createLinearGradient(0, 0, 0, H);
-      grad.addColorStop(0, `rgba(255,255,255, ${alphaTop.toFixed(3)})`);
-      grad.addColorStop(1, `rgba(255,255,255, ${alphaBottom.toFixed(3)})`);
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, W, H);
-      ctx.restore();
-    }
-
-    function drawScene() {
-      drawBackground();
-
-      for (const o of obstacles) {
-        drawObstacle(o);
-      }
-      drawPlane();
-
-      drawFogOverlay();
-
-      if (gameOver) {
-        ctx.fillStyle = "rgba(0,0,0,0.65)";
-        ctx.fillRect(0, H / 2 - 70, W, 140);
-
-        ctx.textAlign = "center";
-
-        ctx.font = "30px " + UI_FONT;
-        ctx.fillStyle = "#ffeb3b";
-        ctx.fillText("Game Over", W / 2, H / 2 - 20);
-
-        ctx.font = "17px " + UI_FONT;
-        ctx.fillStyle = "#ffe082";
-        ctx.fillText(`Score: ${score}  •  Best: ${bestScore}`, W / 2, H / 2 + 6);
-        ctx.fillText("Tap or press SPACE to return to menu", W / 2, H / 2 + 34);
-      }
-    }
-
-    // ---------- SPLASH SCREEN ----------
-    function drawSplash() {
-      if (screen !== "splash") return;
-
-      ctx.clearRect(0, 0, W, H);
-      ctx.fillStyle = "#fdfaf3";
-      ctx.fillRect(0, 0, W, H);
-
-      ctx.textAlign = "center";
-
-      ctx.font = "28px " + UI_FONT;
-      ctx.fillStyle = "#0d47a1";
-      ctx.strokeStyle = "rgba(0,0,0,0.4)";
-      ctx.lineWidth = 2;
-      ctx.strokeText("WW1 Air Patrol", W / 2, H * 0.15);
-      ctx.fillText("WW1 Air Patrol", W / 2, H * 0.15);
-
-      ctx.font = "16px " + UI_FONT;
-      ctx.fillStyle = "#4e342e";
-      ctx.fillText("powered by", W / 2, H * 0.20);
-
-      if (splashLogoLoaded) {
-        const targetWidth = 160;
-        const scale = Math.min(targetWidth / splashLogo.width, 1);
-        const imgW = splashLogo.width * scale;
-        const imgH = splashLogo.height * scale;
-        const x = (W - imgW) / 2;
-        const y = H * 0.22;
-        ctx.drawImage(splashLogo, x, y, imgW, imgH);
-      }
-
-      ctx.font = "18px " + UI_FONT;
-      ctx.fillStyle = "#1b5e20";
-      ctx.strokeStyle = "rgba(0,0,0,0.3)";
-      ctx.lineWidth = 1.5;
-      ctx.strokeText("Choose your side", W / 2, H * 0.45);
-      ctx.fillText("Choose your side", W / 2, H * 0.45);
-
-      const iconSize = 90;
-      const iconY = H * 0.60;
-      const germanX = W * 0.28;
-      const britishX = W * 0.72;
-
-      // German cross
-      germanEntryRect = {
-        x: germanX - iconSize / 2,
-        y: iconY - iconSize / 2,
-        w: iconSize,
-        h: iconSize
-      };
-      ctx.save();
-      ctx.translate(germanX, iconY);
-      const s = iconSize / 2;
-      ctx.fillStyle = "#000";
-      ctx.fillRect(-s * 0.2, -s, s * 0.4, s * 2);
-      ctx.fillRect(-s, -s * 0.2, s * 2, s * 0.4);
-      ctx.fillStyle = "#fff";
-      ctx.fillRect(-s * 0.12, -s * 0.75, s * 0.24, s * 1.5);
-      ctx.fillRect(-s * 0.75, -s * 0.12, s * 1.5, s * 0.24);
-      ctx.restore();
-
-      // British roundel
-      britishEntryRect = {
-        x: britishX - iconSize / 2,
-        y: iconY - iconSize / 2,
-        w: iconSize,
-        h: iconSize
-      };
-      ctx.save();
-      ctx.translate(britishX, iconY);
-      const r = iconSize * 0.45;
-      ctx.beginPath();
-      ctx.fillStyle = "#165ba5";
-      ctx.arc(0, 0, r, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.fillStyle = "#ffffff";
-      ctx.arc(0, 0, r * 0.7, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.fillStyle = "#c7232c";
-      ctx.arc(0, 0, r * 0.38, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-
-      ctx.fillStyle = "#3e2723";
-      ctx.font = "15px " + UI_FONT;
-      ctx.fillText("German Air Service", germanX, iconY + iconSize * 0.75);
-      ctx.fillText("Royal Flying Corps", britishX, iconY + iconSize * 0.75);
-
-      // Top Aces from local leaderboard (this device)
-      ctx.textAlign = "center";
-      ctx.fillStyle = "#1a237e";
-      ctx.font = "16px " + UI_FONT;
-      ctx.fillText("Top Aces (this device)", W / 2, H * 0.78);
-
-      ctx.font = "13px " + UI_FONT;
-      ctx.fillStyle = "#37474f";
-      const maxEntries = Math.min(leaderboard.length, 5);
-      for (let i = 0; i < maxEntries; i++) {
-        const entry = leaderboard[i];
-        const line = `${i + 1}. ${entry.name} – ${entry.score}`;
-        ctx.fillText(line, W / 2, H * 0.78 + 20 * (i + 1));
-      }
-
-      hintEl.textContent = "Tap a side to enter";
-    }
-
-    function drawGermanPlaneList() {
-      if (screen !== "planeSelectGerman") return;
-
-      ctx.clearRect(0, 0, W, H);
-      ctx.fillStyle = "#fdfaf3";
-      ctx.fillRect(0, 0, W, H);
-
-      ctx.textAlign = "center";
-      ctx.fillStyle = "#0d47a1";
-      ctx.font = "22px " + UI_FONT;
-      ctx.fillText("German Air Service", W / 2, H * 0.12);
-
-      ctx.fillStyle = "#4e342e";
-      ctx.font = "16px " + UI_FONT;
-      ctx.fillText("Select your aircraft", W / 2, H * 0.18);
-
-      hintEl.textContent = "Tap a tier to choose your aircraft";
-
-      germanPlaneChoices = [];
-
-      const startY = H * 0.26;
-      const rowH = 82;
-      const rowX = 40;
-      const rowW = W - 80;
-
-      const entries = [
-        { tier: "Tier 1", label: "Fokker DR.3", planeType: "dr3", unlocked: true },
-        { tier: "Tier 2", label: "Fokker DR.1", planeType: "dr1", unlocked: dr1Unlocked },
-        { tier: "Tier 3", label: "DiegoPilot", planeType: "diego", unlocked: true },
-        { tier: "Tier 4", label: "Fokker D.VII", planeType: "dvii", unlocked: true }
-      ];
-
-      entries.forEach((entry, i) => {
-        const y = startY + i * rowH;
-
-        ctx.save();
-        ctx.fillStyle = entry.unlocked ? "rgba(255,255,255,0.97)" : "rgba(230,230,230,0.95)";
-        fillRoundedRect(rowX, y, rowW, rowH - 14, 12);
-
-        ctx.strokeStyle = entry.unlocked ? "rgba(33,33,33,0.3)" : "rgba(100,100,100,0.3)";
-        ctx.lineWidth = 1;
-        ctx.strokeRect(rowX + 0.5, y + 0.5, rowW - 1, rowH - 15);
-
-        const thumbX = rowX + 20;
-        const thumbY = y + (rowH - 14) / 2;
-
-        let imgToUse = null;
-        if (entry.planeType === "dr3") {
-          if (dr3ThumbLoaded)      imgToUse = dr3ThumbImg;
-          else if (dr3Loaded)      imgToUse = dr3Img;
-        } else if (entry.planeType === "dr1") {
-          if (dr1Loaded)           imgToUse = dr1Img;
-        } else if (entry.planeType === "diego") {
-          if (diegoLoaded)         imgToUse = diegoImg;
-        } else if (entry.planeType === "dvii") {
-          if (dviiLoaded)          imgToUse = dviiImg;
-        }
-
-        if (imgToUse) {
-          const maxW = 90;
-          const scale = Math.min(maxW / imgToUse.width, 0.5);
-          const imgW = imgToUse.width * scale;
-          const imgH = imgToUse.height * scale;
-          ctx.drawImage(imgToUse, thumbX - imgW / 2, thumbY - imgH / 2, imgW, imgH);
-        } else {
-          ctx.fillStyle = "#b0bec5";
-          ctx.fillRect(thumbX - 30, thumbY - 15, 60, 30);
-        }
-
-        ctx.textAlign = "left";
-        ctx.fillStyle = "#263238";
-        ctx.font = "14px " + UI_FONT;
-        ctx.fillText(`${entry.tier} – ${entry.label}`, rowX + 80, y + 28);
-
-        ctx.font = "13px " + UI_FONT;
-        ctx.fillStyle = entry.unlocked ? "#2e7d32" : "#b0bec5";
-        ctx.fillText(entry.unlocked ? "Ready" : "Locked", rowX + 80, y + 48);
-
-        ctx.restore();
-
-        germanPlaneChoices.push({
-          x: rowX,
-          y,
-          w: rowW,
-          h: rowH - 14,
-          planeType: entry.planeType,
-          unlocked: entry.unlocked,
-          tier: entry.tier
-        });
-      });
-
-      ctx.textAlign = "center";
-      ctx.fillStyle = "#5d4037";
-      ctx.font = "13px " + UI_FONT;
-      ctx.fillText("Tap anywhere outside rows to go back", W / 2, H - 30);
-    }
-
-    function drawBritishWIP() {
-      if (screen !== "planeSelectBritish") return;
-
-      ctx.clearRect(0, 0, W, H);
-      ctx.fillStyle = "#fdfaf3";
-      ctx.fillRect(0, 0, W, H);
-
-      ctx.textAlign = "center";
-
-      ctx.fillStyle = "#0d47a1";
-      ctx.font = "22px " + UI_FONT;
-      ctx.fillText("Royal Flying Corps", W / 2, H * 0.16);
-
-      const centerX = W / 2;
-      const centerY = H * 0.40;
-      const r = 90;
-
-      ctx.beginPath();
-      ctx.fillStyle = "#165ba5";
-      ctx.arc(centerX, centerY, r, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.beginPath();
-      ctx.fillStyle = "#ffffff";
-      ctx.arc(centerX, centerY, r * 0.7, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.beginPath();
-      ctx.fillStyle = "#c7232c";
-      ctx.arc(centerX, centerY, r * 0.4, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = "#4e342e";
-      ctx.font = "18px " + UI_FONT;
-      ctx.fillText("Under construction", W / 2, H * 0.62);
-
-      ctx.fillStyle = "#5d4037";
-      ctx.font = "14px " + UI_FONT;
-      ctx.fillText("Tap to return to side selection", W / 2, H * 0.68);
-
-      hintEl.textContent = "British side\nUnder construction – tap to go back";
-    }
-
-    function endGame() {
-      gameOver = true;
-      gameRunning = false;
-      drawScene();
-    }
-
-    function loop(timestamp) {
-      if (!gameRunning) return;
-
-      if (!lastTime) {
-        lastTime = timestamp;
-        lastSpawnTime = timestamp;
-      }
-      const dt = timestamp - lastTime;
-      lastTime = timestamp;
-
-      update(dt, timestamp);
-      drawScene();
-
-      if (gameRunning) requestAnimationFrame(loop);
-    }
-
-    function getCanvasCoordinates(evt) {
-      const rect = canvas.getBoundingClientRect();
-      let clientX, clientY;
-
-      if (evt.touches && evt.touches.length > 0) {
-        clientX = evt.touches[0].clientX;
-        clientY = evt.touches[0].clientY;
-      } else if (evt.changedTouches && evt.changedTouches.length > 0) {
-        clientX = evt.changedTouches[0].clientX;
-        clientY = evt.changedTouches[0].clientY;
-      } else {
-        clientX = evt.clientX;
-        clientY = evt.clientY;
-      }
-
-      const x = ((clientX - rect.left) / rect.width) * W;
-      const y = ((clientY - rect.top) / rect.height) * H;
-      return { x, y };
-    }
-
-    function handleInput(evt) {
-      if (screen === "splash") {
-        if (evt) {
-          const { x, y } = getCanvasCoordinates(evt);
-
-          function inside(r) {
-            return r && x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h;
-          }
-
-          if (inside(germanEntryRect)) {
-            screen = "planeSelectGerman";
-            drawGermanPlaneList();
-            return;
-          }
-          if (inside(britishEntryRect)) {
-            screen = "planeSelectBritish";
-            drawBritishWIP();
-            return;
-          }
-          return;
-        } else {
-          ensurePilotName();
-          planeType = "dr3";
-          screen = "game";
-          hintEl.textContent = "Tap or press SPACE to fly ✈️";
-          resetGame();
-          flap();
-          startGameLoop();
-          return;
-        }
-      }
-
-      if (screen === "planeSelectGerman") {
-        if (!evt) {
-          ensurePilotName();
-          planeType = "dr3";
-          screen = "game";
-          hintEl.textContent = "Tap or press SPACE to fly ✈️";
-          resetGame();
-          flap();
-          startGameLoop();
-          return;
-        }
-
-        const { x, y } = getCanvasCoordinates(evt);
-        let clickedRow = null;
-        for (const row of germanPlaneChoices) {
-          if (x >= row.x && x <= row.x + row.w && y >= row.y && y <= row.y + row.h) {
-            clickedRow = row;
-            break;
-          }
-        }
-
-        if (clickedRow) {
-          if (!clickedRow.unlocked) {
-            hintEl.textContent = "Tier 2 locked.\nReach Stage 4 with 40+ points to unlock.";
-            return;
-          }
-          ensurePilotName();
-          planeType = clickedRow.planeType;
-          screen = "game";
-          hintEl.textContent = "Tap or press SPACE to fly ✈️";
-          resetGame();
-          flap();
-          startGameLoop();
-          return;
-        } else {
-          screen = "splash";
-          hintEl.textContent = "Tap a side to enter";
-          drawSplash();
-          return;
-        }
-      }
-
-      if (screen === "planeSelectBritish") {
-        screen = "splash";
-        hintEl.textContent = "Tap a side to enter";
-        drawSplash();
-        return;
-      }
-
-      if (gameOver) {
-        gameOver = false;
-        screen = "splash";
-        hintEl.textContent = "Tap a side to enter";
-        drawSplash();
-        return;
-      }
-
-      if (screen === "game") {
-        flap();
-        startGameLoop();
-      }
-    }
-
-    window.addEventListener("keydown", (e) => {
-      if (e.code === "Space" || e.code === "ArrowUp") {
-        e.preventDefault();
-        handleInput(null);
-      }
+      body: JSON.stringify({ name: name, score: newScore })
     });
+  } catch (err) {
+    console.log("Online score send failed:", err);
+  }
+}
 
-    window.addEventListener("mousedown", (e) => {
-      e.preventDefault();
-      handleInput(e);
-    });
+// === MAIN LOOP ===
+function gameLoop() {
+  if (screen === "game") updateGame();
+  if (screen === "game") drawGame();
+  if (screen === "splash") drawSplash();
+  if (screen === "gameover") drawGameOver();
+  requestAnimationFrame(gameLoop);
+}
+requestAnimationFrame(gameLoop);
 
-    window.addEventListener("touchstart", (e) => {
-      e.preventDefault();
-      handleInput(e);
-    }, { passive: false });
+// === INPUT ===
+function handleInput() {
+  if (screen === "splash") {
+    if (pilotName.length > 0) {
+      screen = "game";
+      resetGame();
+      gameRunning = true;
+      return;
+    }
+  }
+
+  if (screen === "game") flap();
+
+  if (screen === "gameover") {
+    if (score > bestLocalScore) {
+      bestLocalScore = score;
+      localStorage.setItem("bestScore", bestLocalScore);
+    }
+
+    if (!sentOnline && score > 0) {
+      sendScoreOnline(pilotName, score);
+      sentOnline = true;
+    }
 
     resetGame();
-    drawSplash();
-  </script>
+    screen = "game";
+  }
+}
+
+// Keyboard
+window.addEventListener("keydown", (e) => {
+  if (screen === "splash") {
+    if (e.key.length === 1 && pilotName.length < 12) {
+      pilotName += e.key;
+    }
+    if (e.key === "Backspace") pilotName = pilotName.slice(0, -1);
+  }
+
+  if (e.code === "Space" || e.code === "ArrowUp") handleInput();
+});
+
+// Mouse / Touch
+canvas.addEventListener("mousedown", handleInput);
+canvas.addEventListener("touchstart", handleInput);
+
+</script>
 </body>
 </html>
