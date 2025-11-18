@@ -245,6 +245,7 @@
     splashLogo.onerror = () => console.error("Could not load Logo.png");
     splashLogo.src = "Logo.png";
 
+    // === Levels with per-level parallax ===
     const LEVELS = [
       {
         name: "Fokker Eindecker",
@@ -254,7 +255,13 @@
         gravity: 0.28,
         jump: -6.5,
         sky: ["#cbdaf0", "#f2f5fb"],
-        ground: ["#c9b884", "#9f8957"]
+        ground: ["#c9b884", "#9f8957"],
+        parallax: {
+          farColor: "#355723",
+          midColor: "#7e653e",
+          foreColor: "#4a3b26",
+          theme: "rural"
+        }
       },
       {
         name: "Observation Balloons",
@@ -264,7 +271,13 @@
         gravity: 0.32,
         jump: -7.0,
         sky: ["#e3e3e3", "#cfcfcf"],
-        ground: ["#b2c18a", "#7a9153"]
+        ground: ["#b2c18a", "#7a9153"],
+        parallax: {
+          farColor: "#4f5b32",
+          midColor: "#8d6e63",
+          foreColor: "#5d4037",
+          theme: "farmland"
+        }
       },
       {
         name: "Zeppelin Raid",
@@ -274,7 +287,13 @@
         gravity: 0.33,
         jump: -7.2,
         sky: ["#9aa7c3", "#d8dde7"],
-        ground: ["#8c8b6a", "#494736"]
+        ground: ["#8c8b6a", "#494736"],
+        parallax: {
+          farColor: "#455a64",
+          midColor: "#6d4c41",
+          foreColor: "#3e2723",
+          theme: "industrial"
+        }
       },
       {
         name: "Ace of Aces",
@@ -284,7 +303,13 @@
         gravity: 0.35,
         jump: -7.4,
         sky: ["#5b7b9a", "#cfd7e0"],
-        ground: ["#5c6b40", "#2f3a20"]
+        ground: ["#5c6b40", "#2f3a20"],
+        parallax: {
+          farColor: "#37474f",
+          midColor: "#4e342e",
+          foreColor: "#263238",
+          theme: "battlefield"
+        }
       }
     ];
 
@@ -734,70 +759,169 @@
       drawParallaxGround();
     }
 
+    // === New multi-level parallax ground ===
     function drawParallaxGround() {
-      const groundTop = H - GROUND_HEIGHT;
-      const farY = groundTop + 16;
-      const midY = groundTop + 30;
-      const foreY = groundTop + 40;
+      const level = LEVELS[currentLevelIndex];
+      const p = level.parallax || {};
+      const farColor = p.farColor || "#3e5136";
+      const midColor = p.midColor || "#7e653e";
+      const foreColor = p.foreColor || "#4a3b26";
+      const theme = p.theme || "rural";
 
+      const groundTop = H - GROUND_HEIGHT;
+
+      // little variation per level so Y offsets change
+      const baseOffset = currentLevelIndex * 3;
+      const farY = groundTop + 16 + baseOffset;
+      const midY = groundTop + 30 + baseOffset;
+      const foreY = groundTop + 40 + baseOffset;
+
+      // ---- FAR LAYER: distant hills / silhouettes ----
       const farSegW = 140;
       let fx = parallax.far % farSegW;
       if (fx > 0) fx -= farSegW;
 
-      ctx.fillStyle = "#3e5136";
+      ctx.fillStyle = farColor;
       for (let x = fx; x < W + farSegW; x += farSegW) {
         ctx.beginPath();
         ctx.moveTo(x, H);
         ctx.lineTo(x, farY + 18);
-        ctx.quadraticCurveTo(
-          x + farSegW * 0.25, farY - 6,
-          x + farSegW * 0.5, farY + 10
-        );
-        ctx.quadraticCurveTo(
-          x + farSegW * 0.75, farY + 24,
-          x + farSegW, farY + 12
-        );
+
+        if (theme === "battlefield") {
+          ctx.quadraticCurveTo(
+            x + farSegW * 0.25, farY + 4,
+            x + farSegW * 0.5, farY + 14
+          );
+          ctx.quadraticCurveTo(
+            x + farSegW * 0.75, farY + 28,
+            x + farSegW, farY + 16
+          );
+        } else {
+          ctx.quadraticCurveTo(
+            x + farSegW * 0.25, farY - 6,
+            x + farSegW * 0.5, farY + 10
+          );
+          ctx.quadraticCurveTo(
+            x + farSegW * 0.75, farY + 24,
+            x + farSegW, farY + 12
+          );
+        }
+
         ctx.lineTo(x + farSegW, H);
         ctx.closePath();
         ctx.fill();
+
+        // Forest silhouettes: rural / farmland
+        if (theme === "rural" || theme === "farmland") {
+          const treeBaseY = farY + 8;
+          ctx.fillStyle = "rgba(20,40,20,0.8)";
+          for (let i = 0; i < 3; i++) {
+            const tx = x + 15 + i * 30;
+            ctx.beginPath();
+            ctx.moveTo(tx, treeBaseY - 14);
+            ctx.lineTo(tx - 6, treeBaseY + 4);
+            ctx.lineTo(tx + 6, treeBaseY + 4);
+            ctx.closePath();
+            ctx.fill();
+          }
+          ctx.fillStyle = farColor;
+        }
+
+        // Factory chimneys in industrial level
+        if (theme === "industrial") {
+          ctx.fillStyle = "rgba(30,30,35,0.9)";
+          const bX = x + farSegW * 0.4;
+          const bY = farY + 5;
+          ctx.fillRect(bX, bY - 16, 10, 16);
+          ctx.fillRect(bX + 16, bY - 22, 8, 22);
+
+          ctx.fillStyle = "rgba(80,80,80,0.6)";
+          ctx.beginPath();
+          ctx.arc(bX + 18, bY - 26, 5, 0, Math.PI * 2);
+          ctx.arc(bX + 22, bY - 32, 4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = farColor;
+        }
       }
 
+      // ---- MID LAYER: fences / fields / trenches / low buildings ----
       const midSegW = 110;
       let mx = parallax.mid % midSegW;
       if (mx > 0) mx -= midSegW;
 
       for (let x = mx; x < W + midSegW; x += midSegW) {
-        ctx.fillStyle = "#7e653e";
-        ctx.fillRect(x, midY + 4, midSegW * 0.7, 8);
+        if (theme === "industrial") {
+          // Low town strip
+          ctx.fillStyle = midColor;
+          ctx.fillRect(x, midY - 6, midSegW * 0.9, 14);
+          ctx.fillStyle = "rgba(30,30,30,0.9)";
+          for (let w = 0; w < 4; w++) {
+            ctx.fillRect(x + 6 + w * 20, midY - 2, 8, 4);
+          }
+        } else if (theme === "battlefield") {
+          // Trenches
+          ctx.fillStyle = midColor;
+          ctx.fillRect(x, midY + 4, midSegW * 0.7, 10);
 
-        ctx.fillStyle = "#5b4a30";
-        ctx.beginPath();
-        ctx.ellipse(x + midSegW * 0.35, midY + 10, 10, 4, 0, 0, Math.PI * 2);
-        ctx.fill();
+          ctx.strokeStyle = "rgba(20,10,5,0.9)";
+          ctx.lineWidth = 1.3;
+          ctx.beginPath();
+          ctx.moveTo(x, midY + 2);
+          ctx.lineTo(x + midSegW * 0.7, midY + 2);
+          ctx.stroke();
 
-        ctx.strokeStyle = "rgba(40,30,20,0.9)";
-        ctx.lineWidth = 1.3;
-        ctx.beginPath();
-        ctx.moveTo(x + 6, midY);
-        ctx.lineTo(x + 6, midY - 8);
-        ctx.moveTo(x + 26, midY);
-        ctx.lineTo(x + 26, midY - 7);
-        ctx.stroke();
+          ctx.strokeStyle = "rgba(40,30,20,0.9)";
+          ctx.beginPath();
+          for (let i = 0; i < 5; i++) {
+            const px = x + 8 + i * 16;
+            ctx.moveTo(px, midY + 2);
+            ctx.lineTo(px - 3, midY - 10);
+          }
+          ctx.stroke();
+        } else {
+          // Original fence strip for rural/farmland
+          ctx.fillStyle = midColor;
+          ctx.fillRect(x, midY + 4, midSegW * 0.7, 8);
 
-        ctx.strokeStyle = "rgba(80,60,40,0.8)";
-        ctx.lineWidth = 0.9;
-        ctx.beginPath();
-        ctx.moveTo(x + 6, midY - 7);
-        ctx.lineTo(x + 26, midY - 6);
-        ctx.stroke();
+          ctx.fillStyle = "#5b4a30";
+          ctx.beginPath();
+          ctx.ellipse(x + midSegW * 0.35, midY + 10, 10, 4, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.strokeStyle = "rgba(40,30,20,0.9)";
+          ctx.lineWidth = 1.3;
+          ctx.beginPath();
+          ctx.moveTo(x + 6, midY);
+          ctx.lineTo(x + 6, midY - 8);
+          ctx.moveTo(x + 26, midY);
+          ctx.lineTo(x + 26, midY - 7);
+          ctx.stroke();
+
+          ctx.strokeStyle = "rgba(80,60,40,0.8)";
+          ctx.lineWidth = 0.9;
+          ctx.beginPath();
+          ctx.moveTo(x + 6, midY - 7);
+          ctx.lineTo(x + 26, midY - 6);
+          ctx.stroke();
+
+          // Hay bales on farmland
+          if (theme === "farmland") {
+            ctx.fillStyle = "rgba(235, 203, 139, 0.85)";
+            ctx.beginPath();
+            ctx.ellipse(x + 50, midY + 6, 7, 4, 0, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
       }
 
+      // ---- FOREGROUND LAYER: bunkers / craters / buildings ----
       const foreSegW = 130;
       let bx = parallax.fore % foreSegW;
       if (bx > 0) bx -= foreSegW;
 
       for (let x = bx; x < W + foreSegW; x += foreSegW) {
-        ctx.fillStyle = "#4a3b26";
+        ctx.fillStyle = foreColor;
+
         ctx.beginPath();
         ctx.moveTo(x, foreY + 10);
         ctx.lineTo(x + 18, foreY + 4);
@@ -810,22 +934,59 @@
         ctx.closePath();
         ctx.fill();
 
-        ctx.fillStyle = "#34312c";
-        const bunkX = x + 24;
-        const bunkY = foreY - 6;
-        ctx.fillRect(bunkX, bunkY, 32, 16);
+        if (theme === "industrial") {
+          // Buildings close to camera
+          ctx.fillStyle = "rgba(35,35,40,0.95)";
+          const b1x = x + 18;
+          const b1y = foreY - 4;
+          ctx.fillRect(b1x, b1y - 22, 26, 22);
+          ctx.fillRect(b1x + 32, b1y - 16, 20, 16);
 
-        ctx.fillStyle = "#1b1a18";
-        ctx.fillRect(bunkX + 8, bunkY + 7, 18, 7);
+          ctx.fillStyle = "rgba(250,250,210,0.6)";
+          for (let i = 0; i < 3; i++) {
+            ctx.fillRect(b1x + 4 + i * 7, b1y - 16, 4, 4);
+          }
+        } else if (theme === "battlefield") {
+          // Craters + barbed wire
+          ctx.fillStyle = "rgba(30,20,15,0.9)";
+          ctx.beginPath();
+          ctx.ellipse(x + 30, foreY + 12, 10, 4, 0, 0, Math.PI * 2);
+          ctx.ellipse(x + 70, foreY + 16, 12, 5, 0, 0, Math.PI * 2);
+          ctx.fill();
 
-        const smokeBaseX = bunkX + 26;
-        const smokeBaseY = bunkY - 4;
-        ctx.fillStyle = "rgba(90,90,90,0.6)";
-        ctx.beginPath();
-        ctx.arc(smokeBaseX, smokeBaseY, 6, 0, Math.PI * 2);
-        ctx.arc(smokeBaseX + 6, smokeBaseY - 6, 5, 0, Math.PI * 2);
-        ctx.arc(smokeBaseX - 4, smokeBaseY - 10, 4, 0, Math.PI * 2);
-        ctx.fill();
+          ctx.strokeStyle = "rgba(15,10,8,0.9)";
+          ctx.lineWidth = 1.1;
+          ctx.beginPath();
+          ctx.moveTo(x + 6, foreY + 2);
+          ctx.lineTo(x + foreSegW - 10, foreY - 2);
+          ctx.stroke();
+
+          ctx.beginPath();
+          for (let i = 0; i < 5; i++) {
+            const px = x + 10 + i * 18;
+            ctx.moveTo(px, foreY);
+            ctx.lineTo(px + 4, foreY - 8);
+          }
+          ctx.stroke();
+        } else {
+          // Original bunker & smoke for rural/farmland
+          ctx.fillStyle = "#34312c";
+          const bunkX = x + 24;
+          const bunkY = foreY - 6;
+          ctx.fillRect(bunkX, bunkY, 32, 16);
+
+          ctx.fillStyle = "#1b1a18";
+          ctx.fillRect(bunkX + 8, bunkY + 7, 18, 7);
+
+          const smokeBaseX = bunkX + 26;
+          const smokeBaseY = bunkY - 4;
+          ctx.fillStyle = "rgba(90,90,90,0.6)";
+          ctx.beginPath();
+          ctx.arc(smokeBaseX, smokeBaseY, 6, 0, Math.PI * 2);
+          ctx.arc(smokeBaseX + 6, smokeBaseY - 6, 5, 0, Math.PI * 2);
+          ctx.arc(smokeBaseX - 4, smokeBaseY - 10, 4, 0, Math.PI * 2);
+          ctx.fill();
+        }
       }
     }
 
@@ -1478,7 +1639,7 @@
         return;
       }
 
-           if (gameOver) {
+      if (gameOver) {
         gameOver = false;
         screen = "splash";
         hintEl.textContent = "Tap a side to enter";
