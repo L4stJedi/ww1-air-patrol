@@ -4,6 +4,41 @@
   <meta charset="UTF-8" />
   <title>WW1 Sky Patrol</title>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// === SUPABASE INIT ===
+const SUPABASE_URL = "https://jnpzarwuilevjdulgxrc.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpucHphcnd1aWxldmpkdWxneHJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0MTk1OTIsImV4cCI6MjA3ODk5NTU5Mn0.agBNLqBMUSE9-MxD4U9Evij8mGSxU5ey_LdFuA3tqZE";
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Fetch leaderboard
+async function fetchLeaderboard() {
+  const { data, error } = await supabase
+    .from("scores")
+    .select("name, score")
+    .order("score", { ascending: false })
+    .limit(10);
+
+  if (error) {
+    console.log("Supabase fetch error:", error);
+    return [];
+  }
+  return data || [];
+}
+
+// Submit a score
+async function submitScore(name, score) {
+  const { error } = await supabase
+    .from("scores")
+    .insert([{ name, score }]);
+
+  if (error) {
+    console.log("Supabase insert error:", error);
+  }
+}
+</script>
+
   <!-- iPhone full-screen web app settings -->
   <meta name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
