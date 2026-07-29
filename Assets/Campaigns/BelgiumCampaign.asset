@@ -1,0 +1,113 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 280377929711b4acaa251e6cda1622fc, type: 3}
+  m_Name: BelgiumCampaign
+  m_EditorClassIdentifier: Assembly-CSharp::MapMechanics.CampaignDefinition
+  campaignId: belgium
+  displayName: Belgium
+  stages:
+  - id: opening-patrol
+    displayName: Opening Patrol
+    introMessage: 
+    duration: 30
+    advanceAutomatically: 1
+    enemyPrefab: {fileID: 4836874462652450753, guid: 2c8c1f8b1f828b84cad0bfd59a3d1be1, type: 3}
+    enemySpawnInterval: 0.8
+    enemiesPerSpawn: 1
+    enemySpawnChance: 40
+    spawnObstacles: 0
+    obstaclePrefab: {fileID: 4773767478036524041, guid: 5cd880d967d688446b0dfa762a754d78, type: 3}
+    obstacleSpawnInterval: 2
+    obstaclesPerSpawn: 1
+    obstacleSpawnChance: 60
+    bossPrefab: {fileID: 0}
+    escortPrefab: {fileID: 0}
+    requireBossDefeat: 0
+    isBossStage: 0
+    completesCampaign: 0
+  - id: flak-screen
+    displayName: Flak Screen
+    introMessage: 
+    duration: 30
+    advanceAutomatically: 1
+    enemyPrefab: {fileID: 6479702844630563697, guid: 1eaeb58185a409b4a93c1b5333e6d7dd, type: 3}
+    enemySpawnInterval: 0.8
+    enemiesPerSpawn: 1
+    enemySpawnChance: 40
+    spawnObstacles: 1
+    obstaclePrefab: {fileID: 4773767478036524041, guid: 5cd880d967d688446b0dfa762a754d78, type: 3}
+    obstacleSpawnInterval: 2.8
+    obstaclesPerSpawn: 1
+    obstacleSpawnChance: 30
+    bossPrefab: {fileID: 0}
+    escortPrefab: {fileID: 0}
+    requireBossDefeat: 0
+    isBossStage: 0
+    completesCampaign: 0
+  - id: observation-line
+    displayName: Observation Line
+    introMessage: 
+    duration: 30
+    advanceAutomatically: 1
+    enemyPrefab: {fileID: 984688225143498108, guid: 6f32b7e7489353e4db714c100874f2db, type: 3}
+    enemySpawnInterval: 0.9
+    enemiesPerSpawn: 1
+    enemySpawnChance: 40
+    spawnObstacles: 1
+    obstaclePrefab: {fileID: 4773767478036524041, guid: 5cd880d967d688446b0dfa762a754d78, type: 3}
+    obstacleSpawnInterval: 2
+    obstaclesPerSpawn: 1
+    obstacleSpawnChance: 60
+    bossPrefab: {fileID: 0}
+    escortPrefab: {fileID: 0}
+    requireBossDefeat: 0
+    isBossStage: 0
+    completesCampaign: 0
+  - id: contested-line
+    displayName: Contested Line
+    introMessage: 
+    duration: 30
+    advanceAutomatically: 1
+    enemyPrefab: {fileID: 8455246195803726434, guid: eaab68461d902b84d81ce1c36be901dd, type: 3}
+    enemySpawnInterval: 1
+    enemiesPerSpawn: 1
+    enemySpawnChance: 45
+    spawnObstacles: 1
+    obstaclePrefab: {fileID: 4773767478036524041, guid: 5cd880d967d688446b0dfa762a754d78, type: 3}
+    obstacleSpawnInterval: 2
+    obstaclesPerSpawn: 1
+    obstacleSpawnChance: 60
+    bossPrefab: {fileID: 0}
+    escortPrefab: {fileID: 0}
+    requireBossDefeat: 0
+    isBossStage: 0
+    completesCampaign: 0
+  - id: ace-pursuit
+    displayName: Ace Pursuit
+    introMessage: 
+    duration: 30
+    advanceAutomatically: 1
+    enemyPrefab: {fileID: 1546931428999686709, guid: 33402322c65997145b5095d9297f2522, type: 3}
+    enemySpawnInterval: 1.1
+    enemiesPerSpawn: 1
+    enemySpawnChance: 0
+    spawnObstacles: 1
+    obstaclePrefab: {fileID: 4773767478036524041, guid: 5cd880d967d688446b0dfa762a754d78, type: 3}
+    obstacleSpawnInterval: 2
+    obstaclesPerSpawn: 1
+    obstacleSpawnChance: 60
+    bossPrefab: {fileID: 1546931428999686709, guid: 33402322c65997145b5095d9297f2522, type: 3}
+    escortPrefab: {fileID: 4836874462652450753, guid: 2c8c1f8b1f828b84cad0bfd59a3d1be1, type: 3}
+    requireBossDefeat: 1
+    isBossStage: 1
+    completesCampaign: 1
+  isImplemented: 1

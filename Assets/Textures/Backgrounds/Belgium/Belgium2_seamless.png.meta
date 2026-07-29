@@ -1,0 +1,468 @@
+fileFormatVersion: 2
+guid: d3d2686ccd3cf72429c8a2b4cbd6c329
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 1196064878296633888
+    second: Belgium2_seamless_0
+  - first:
+      213: 1295684503946930552
+    second: Belgium2_seamless_1
+  - first:
+      213: 916323240771770270
+    second: Belgium2_seamless_2
+  - first:
+      213: -5482400065658392556
+    second: Belgium2_seamless_3
+  - first:
+      213: 6013583008529694780
+    second: Belgium2_seamless_4
+  - first:
+      213: -9037856567711748668
+    second: Belgium2_seamless_5
+  - first:
+      213: 9097319042069340998
+    second: Belgium2_seamless_6
+  - first:
+      213: 807442463760812026
+    second: Belgium2_seamless_7
+  - first:
+      213: 4127501667754602350
+    second: Belgium2_seamless_8
+  - first:
+      213: -7741652539809436999
+    second: Belgium2_seamless_9
+  - first:
+      213: 8623936370485192098
+    second: Belgium2_seamless_10
+  - first:
+      213: -6737298091795160146
+    second: Belgium2_seamless_11
+  - first:
+      213: -6716412362641917211
+    second: Belgium2_seamless_12
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Belgium2_seamless_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 2916
+        height: 1232
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 02211377ba6499010800000000000000
+      internalID: 1196064878296633888
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Belgium2_seamless_1
+      rect:
+        serializedVersion: 2
+        x: 1882
+        y: 966
+        width: 236
+        height: 266
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8792cb601323bf110800000000000000
+      internalID: 1295684503946930552
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Belgium2_seamless_2
+      rect:
+        serializedVersion: 2
+        x: 2827
+        y: 1175
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e97d2a1f12f67bc00800000000000000
+      internalID: 916323240771770270
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Belgium2_seamless_3
+      rect:
+        serializedVersion: 2
+        x: 1452
+        y: 1042
+        width: 8
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4107ad1ff2a9ae3b0800000000000000
+      internalID: -5482400065658392556
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Belgium2_seamless_4
+      rect:
+        serializedVersion: 2
+        x: 1577
+        y: 1016
+        width: 11
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c30ccba82e9847350800000000000000
+      internalID: 6013583008529694780
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Belgium2_seamless_5
+      rect:
+        serializedVersion: 2
+        x: 1020
+        y: 966
+        width: 9
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4cd2c961655139280800000000000000
+      internalID: -9037856567711748668
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Belgium2_seamless_6
+      rect:
+        serializedVersion: 2
+        x: 1771
+        y: 948
+        width: 9
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 643a0f6187b204e70800000000000000
+      internalID: 9097319042069340998
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Belgium2_seamless_7
+      rect:
+        serializedVersion: 2
+        x: 2410
+        y: 948
+        width: 10
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: af7870d84ac943b00800000000000000
+      internalID: 807442463760812026
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Belgium2_seamless_8
+      rect:
+        serializedVersion: 2
+        x: 1642
+        y: 824
+        width: 9
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e6f685cf5e4d74930800000000000000
+      internalID: 4127501667754602350
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Belgium2_seamless_9
+      rect:
+        serializedVersion: 2
+        x: 1652
+        y: 823
+        width: 7
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9ba68263800209490800000000000000
+      internalID: -7741652539809436999
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Belgium2_seamless_10
+      rect:
+        serializedVersion: 2
+        x: 2218
+        y: 824
+        width: 7
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2a56758ff606ea770800000000000000
+      internalID: 8623936370485192098
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Belgium2_seamless_11
+      rect:
+        serializedVersion: 2
+        x: 2806
+        y: 723
+        width: 55
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ea3e1acc41f4082a0800000000000000
+      internalID: -6737298091795160146
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Belgium2_seamless_12
+      rect:
+        serializedVersion: 2
+        x: 2870
+        y: 739
+        width: 30
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5eabfaf8a828ac2a0800000000000000
+      internalID: -6716412362641917211
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Belgium2_seamless_0: 1196064878296633888
+      Belgium2_seamless_1: 1295684503946930552
+      Belgium2_seamless_10: 8623936370485192098
+      Belgium2_seamless_11: -6737298091795160146
+      Belgium2_seamless_12: -6716412362641917211
+      Belgium2_seamless_2: 916323240771770270
+      Belgium2_seamless_3: -5482400065658392556
+      Belgium2_seamless_4: 6013583008529694780
+      Belgium2_seamless_5: -9037856567711748668
+      Belgium2_seamless_6: 9097319042069340998
+      Belgium2_seamless_7: 807442463760812026
+      Belgium2_seamless_8: 4127501667754602350
+      Belgium2_seamless_9: -7741652539809436999
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -1,0 +1,121 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &6221663795671412212
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1728376557263130176, guid: 2c8c1f8b1f828b84cad0bfd59a3d1be1, type: 3}
+      propertyPath: m_FlipX
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1728376557263130176, guid: 2c8c1f8b1f828b84cad0bfd59a3d1be1, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 8320472039758872947, guid: 5cbb91d585be51b49b52998413180323, type: 3}
+    - target: {fileID: 1728376557263130176, guid: 2c8c1f8b1f828b84cad0bfd59a3d1be1, type: 3}
+      propertyPath: m_Color.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1728376557263130176, guid: 2c8c1f8b1f828b84cad0bfd59a3d1be1, type: 3}
+      propertyPath: m_Color.g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1728376557263130176, guid: 2c8c1f8b1f828b84cad0bfd59a3d1be1, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2173031351081428357, guid: 2c8c1f8b1f828b84cad0bfd59a3d1be1, type: 3}
+      propertyPath: m_Size.x
+      value: 1.8959767
+      objectReference: {fileID: 0}
+    - target: {fileID: 2173031351081428357, guid: 2c8c1f8b1f828b84cad0bfd59a3d1be1, type: 3}
+      propertyPath: m_Size.y
+      value: 0.53826153
+      objectReference: {fileID: 0}
+    - target: {fileID: 2173031351081428357, guid: 2c8c1f8b1f828b84cad0bfd59a3d1be1, type: 3}
+      propertyPath: m_Offset.x
+      value: -0.2856738
+      objectReference: {fileID: 0}
+    - target: {fileID: 2173031351081428357, guid: 2c8c1f8b1f828b84cad0bfd59a3d1be1, type: 3}
+      propertyPath: m_Offset.y
+      value: 0.080774754
+      objectReference: {fileID: 0}
+    - target: {fileID: 2175959184226870656, guid: 2c8c1f8b1f828b84cad0bfd59a3d1be1, type: 3}
+      propertyPath: maxHp
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3089203630568694306, guid: 2c8c1f8b1f828b84cad0bfd59a3d1be1, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3089203630568694306, guid: 2c8c1f8b1f828b84cad0bfd59a3d1be1, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3089203630568694306, guid: 2c8c1f8b1f828b84cad0bfd59a3d1be1, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3089203630568694306, guid: 2c8c1f8b1f828b84cad0bfd59a3d1be1, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3089203630568694306, guid: 2c8c1f8b1f828b84cad0bfd59a3d1be1, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3089203630568694306, guid: 2c8c1f8b1f828b84cad0bfd59a3d1be1, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3089203630568694306, guid: 2c8c1f8b1f828b84cad0bfd59a3d1be1, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3089203630568694306, guid: 2c8c1f8b1f828b84cad0bfd59a3d1be1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3089203630568694306, guid: 2c8c1f8b1f828b84cad0bfd59a3d1be1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3089203630568694306, guid: 2c8c1f8b1f828b84cad0bfd59a3d1be1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4836874462652450753, guid: 2c8c1f8b1f828b84cad0bfd59a3d1be1, type: 3}
+      propertyPath: m_Name
+      value: EnemyAircoDH9
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4836874462652450753, guid: 2c8c1f8b1f828b84cad0bfd59a3d1be1, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6204270515692049772}
+  m_SourcePrefab: {fileID: 100100000, guid: 2c8c1f8b1f828b84cad0bfd59a3d1be1, type: 3}
+--- !u!1 &1546931428999686709 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4836874462652450753, guid: 2c8c1f8b1f828b84cad0bfd59a3d1be1, type: 3}
+  m_PrefabInstance: {fileID: 6221663795671412212}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6204270515692049772
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1546931428999686709}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5128543b4390440e091e2758af389e8f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyPlaneScripts.BossVisualMarker
+  bossTint: {r: 1, g: 0.55, b: 0.25, a: 1}
+  scaleMultiplier: 1.25

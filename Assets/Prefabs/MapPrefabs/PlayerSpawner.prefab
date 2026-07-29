@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &123484867354242442
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4260851103546639835}
+  - component: {fileID: 5124699886777223025}
+  m_Layer: 0
+  m_Name: PlayerSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4260851103546639835
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 123484867354242442}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.87469, y: -0.83257, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5124699886777223025
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 123484867354242442}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3faf520f3863d154b8f485f35ac95b2d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  planes:
+  - {fileID: 1696791970132550076, guid: eeb9c968f652da74ab4ae73b56c8550f, type: 3}
+  runtimePlanes:
+  - planeType: 4
+    sprite: {fileID: 6877875175811522970, guid: 8d4eb3b9a5c23a7419359d791d92bbd0, type: 3}
+    baseFallSpeed: 14
+    baseJumpStrength: 10
+    baseFireSpeed: 0.45
+    baseFireRange: 7
+    baseKillsForXp: 5
+  - planeType: 5
+    sprite: {fileID: -3399923967525038832, guid: 5f563630a14ed2940a144ed055f5811a, type: 3}
+    baseFallSpeed: 14
+    baseJumpStrength: 10
+    baseFireSpeed: 0.4
+    baseFireRange: 7
+    baseKillsForXp: 5
+  - planeType: 9
+    sprite: {fileID: 8320472039758872947, guid: 5cbb91d585be51b49b52998413180323, type: 3}
+    baseFallSpeed: 15
+    baseJumpStrength: 9.5
+    baseFireSpeed: 0.35
+    baseFireRange: 8
+    baseKillsForXp: 5

@@ -1,0 +1,99 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &5679130046104665432
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 658797056995770806, guid: aff1a353fd704594aae596d180789d1a, type: 3}
+      propertyPath: m_Color.b
+      value: 0.2784314
+      objectReference: {fileID: 0}
+    - target: {fileID: 658797056995770806, guid: aff1a353fd704594aae596d180789d1a, type: 3}
+      propertyPath: m_Color.g
+      value: 0.45098042
+      objectReference: {fileID: 0}
+    - target: {fileID: 658797056995770806, guid: aff1a353fd704594aae596d180789d1a, type: 3}
+      propertyPath: m_SortingOrder
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4702729369258759895, guid: aff1a353fd704594aae596d180789d1a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4702729369258759895, guid: aff1a353fd704594aae596d180789d1a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4702729369258759895, guid: aff1a353fd704594aae596d180789d1a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4702729369258759895, guid: aff1a353fd704594aae596d180789d1a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4702729369258759895, guid: aff1a353fd704594aae596d180789d1a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4702729369258759895, guid: aff1a353fd704594aae596d180789d1a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4702729369258759895, guid: aff1a353fd704594aae596d180789d1a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4702729369258759895, guid: aff1a353fd704594aae596d180789d1a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4702729369258759895, guid: aff1a353fd704594aae596d180789d1a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4702729369258759895, guid: aff1a353fd704594aae596d180789d1a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5810178811233720450, guid: aff1a353fd704594aae596d180789d1a, type: 3}
+      propertyPath: m_Name
+      value: EnemyBomb
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 3315994097243385913, guid: aff1a353fd704594aae596d180789d1a, type: 3}
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5810178811233720450, guid: aff1a353fd704594aae596d180789d1a, type: 3}
+      insertIndex: 2
+      addedObject: {fileID: 2874299324759835850}
+  m_SourcePrefab: {fileID: 100100000, guid: aff1a353fd704594aae596d180789d1a, type: 3}
+--- !u!1 &2193732853790320090 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5810178811233720450, guid: aff1a353fd704594aae596d180789d1a, type: 3}
+  m_PrefabInstance: {fileID: 5679130046104665432}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2874299324759835850
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2193732853790320090}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0e702f146b1ecd4c9ed60cd777ee947, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyPlaneScripts.EnemyBombLogic
+  bombDamage: 2
+  rb: {fileID: 8372059098282430924}
+--- !u!50 &8372059098282430924 stripped
+Rigidbody2D:
+  m_CorrespondingSourceObject: {fileID: -4972020354787349356, guid: aff1a353fd704594aae596d180789d1a, type: 3}
+  m_PrefabInstance: {fileID: 5679130046104665432}
+  m_PrefabAsset: {fileID: 0}
